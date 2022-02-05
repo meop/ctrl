@@ -1,0 +1,15 @@
+{
+    "name": "ctrl",
+    "dockerFile": "Dockerfile",
+    "extensions": [
+        "vadimcn.vscode-lldb",
+        "tamasfe.even-better-toml",
+        "panicbit.cargo",
+        "matklad.rust-analyzer",
+        "jscearcy.rust-doc-viewer",
+        "serayuzgur.crates"
+    ],
+    "mounts": [
+        "source=ctrl-vscode-server-extensions,target=/root/.vscode-server/extensions,type=volume"
+    ]
+}

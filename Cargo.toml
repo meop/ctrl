@@ -1,0 +1,23 @@
+[package]
+name = "ctrl"
+version = "0.1.0"
+edition = "2021"
+description = "CLI tool "
+categories = ["command-line-interface"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = { version = "^3", features = ["derive"] }
+config = { version = "^0" }
+serde = { version = "^1", features = ["derive"] }
+
+# simple_logger uses this
+log = { version = "^0", features = ["std"] }
+
+[dependencies.simple_logger]
+default-features = false
+
+# not turning on timestamps
+features = ["colors"]
+version = "^2"
