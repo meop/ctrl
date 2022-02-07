@@ -2,10 +2,7 @@ name: Cargo Release
 
 on:
   push:
-    branches:
-      - main
-    tags:
-      - v[0-9]+.[0-9]+.[0-9]+
+    tags: ["v[0-9].[0-9]+.[0-9]+"]
 
 env:
   CARGO_TERM_COLOR: always
@@ -22,7 +19,6 @@ jobs:
       - name: create release
         uses: softprops/action-gh-release@v1
         with:
-          name: release ${{ github.ref_name }}
           draft: false
           prerelease: false
           generate_release_notes: false
@@ -35,15 +31,18 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
         include:
-          - os: macox-latest
-            release_target: x86_64-apple-darwin
+          - os: macos-latest
+            release_copy: cp ctrl ctrl-darwin-x86_64
             release_suffix: darwin-x86_64
+            release_target: x86_64-apple-darwin
           - os: ubuntu-latest
-            release_target: x86_64-unknown-linux-gnu
+            release_copy: cp ctrl ctrl-linux-x86_64
             release_suffix: linux-x86_64
+            release_target: x86_64-unknown-linux-gnu
           - os: windows-latest
-            release_target: x86_64-pc-windows-gnu
+            release_copy: copy ctrl.exe ctrl-windows-x86_64.exe
             release_suffix: windows-x86_64.exe
+            release_target: x86_64-pc-windows-msvc
 
     steps:
       - name: checkout
@@ -53,15 +52,18 @@ jobs:
       # you must pass the target as itself
       # https://github.com/rust-lang/rust/issues/78210
       - name: build
-        run: cargo build --release --target=${{ matrix.release_suffix }}
+        run: cargo build --release --target=${{ matrix.release_target }}
+
+      - name: bundle
+        working-directory: target/${{ matrix.release_target }}/release
+        run: ${{ matrix.release_copy }}
 
       - name: release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ needs.create_release.outputs.tag_name }}
           # as per getting static linking to work
           # look inside target/ dir for release/ dir
           # right now, only bunding the binary
           # no config (with defaults), examples, etc
-          files: target/${{ matrix.release_target }}/release/ctrl_${{ matrix.release_suffix }}
-    
+          files: |
+            target/${{ matrix.release_target }}/release/ctrl-*
