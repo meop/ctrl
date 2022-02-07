@@ -1,0 +1,67 @@
+name: Cargo Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+
+
+env:
+  CARGO_TERM_COLOR: always
+  
+  # link C runtime statically
+  # so, especially on windows, extra C/C++ libs not required on OS
+  RUSTFLAGS: -C target-feature=+crt-static
+
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: create release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+    
+  build_release:
+    needs: create_release
+    
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        include:
+          - os: macox-latest
+            release_target: x86_64-apple-darwin
+            release_suffix: darwin-x86_64
+          - os: ubuntu-latest
+            release_target: x86_64-unknown-linux-gnu
+            release_suffix: linux-x86_64
+          - os: windows-latest
+            release_target: x86_64-pc-windows-gnu
+            release_suffix: windows-x86_64.exe
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      # to get static linking of C/C++ runtime to work
+      # you must pass the target as itself
+      # https://github.com/rust-lang/rust/issues/78210
+      - name: build
+        run: cargo build --release --target=${{ matrix.release_suffix }}
+
+      - name: release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.create_release.outputs.tag_name }}
+          # as per getting static linking to work
+          # look inside target/ dir for release/ dir
+          # right now, only bunding the binary
+          # no config (with defaults), examples, etc
+          files: target/${{ matrix.release_target }}/release/ctrl_${{ matrix.release_suffix }}
+    
