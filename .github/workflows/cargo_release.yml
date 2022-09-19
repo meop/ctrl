@@ -2,14 +2,19 @@ name: Cargo Release
 
 on:
   push:
-    tags: ["v[0-9].[0-9]+.[0-9]+"]
+    tags: ["[0-9].[0-9]+.[0-9]+"]
 
 env:
+  # need to specify linker file name on linux only
+  # cargo finds linker for macos and windows on its own
+  CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
+  CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: aarch64-linux-gnu-gcc
+
   CARGO_TERM_COLOR: always
-  
+
   # link C runtime statically
   # drop debuginfo and symbols
-  RUSTFLAGS: -C target-feature=+crt-static -C split=symbols
+  RUSTFLAGS: -C target-feature=+crt-static -C strip=symbols
 
 jobs:
   create_release:
@@ -22,43 +27,57 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: false
-    
+
   build_release:
     needs: create_release
-    
+
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        arch: [aarch64, x86_64]
         os: [macos-latest, ubuntu-latest, windows-latest]
         include:
-          - os: macos-latest
+          - arch: aarch64
+            os: macos-latest
             binary: ctrl
             release_binary: ctrl-darwin-aarch64
             release_target: aarch64-apple-darwin
-          - os: macos-latest
+          - arch: x86_64
+            os: macos-latest
             binary: ctrl
             release_binary: ctrl-darwin-x86_64
             release_target: x86_64-apple-darwin
-          - os: ubuntu-latest
+          - arch: aarch64
+            os: ubuntu-latest
             binary: ctrl
             release_binary: ctrl-linux-aarch64
             release_target: aarch64-unknown-linux-gnu
-          - os: ubuntu-latest
+          - arch: x86_64
+            os: ubuntu-latest
             binary: ctrl
             release_binary: ctrl-linux-x86_64
             release_target: x86_64-unknown-linux-gnu
-          - os: windows-latest
+          - arch: aarch64
+            os: windows-latest
             binary: ctrl.exe
             release_binary: ctrl-windows-aarch64.exe
             release_target: aarch64-pc-windows-msvc
-          - os: windows-latest
+          - arch: x86_64
+            os: windows-latest
             binary: ctrl.exe
             release_binary: ctrl-windows-x86_64.exe
             release_target: x86_64-pc-windows-msvc
 
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+
+      - name: install GNU cross compiler / linker
+        run: sudo apt-get install -y gcc-aarch64-linux-gnu
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+
+      - name: target
+        run: rustup target add ${{ matrix.release_target }}
 
       # to get static linking of C/C++ runtime to work
       # you must pass the target as itself
