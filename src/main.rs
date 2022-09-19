@@ -1,3 +1,4 @@
+use std::io::Error;
 use std::process::ExitStatus;
 
 use clap::AppSettings;
@@ -6,32 +7,30 @@ use clap::Subcommand;
 
 use simple_logger::SimpleLogger;
 
-mod cfg;
-mod pkg;
+mod command;
+use command::Invoke;
+mod package;
+use package::CliCommand as PackageCliCommand;
 
-#[derive(Debug, Parser)]
+#[derive(Parser)]
 #[clap(about, version)]
 #[clap(global_setting(AppSettings::DeriveDisplayOrder))]
 #[clap(global_setting(AppSettings::DisableHelpSubcommand))]
 struct Cli {
     #[clap(subcommand)]
-    command: Command,
+    command: CliCommand,
 }
 
-#[derive(Debug, Subcommand)]
-enum Command {
+#[derive(Subcommand)]
+enum CliCommand {
     #[clap(subcommand)]
-    Pkg(pkg::Command),
+    Package(PackageCliCommand),
 }
 
-trait InvokeCommand {
-    fn run(&self) -> Result<ExitStatus, std::io::Error>;
-}
-
-impl InvokeCommand for Command {
-    fn run(&self) -> Result<ExitStatus, std::io::Error> {
+impl Invoke for CliCommand {
+    fn run(&self) -> Result<ExitStatus, Error> {
         match self {
-            Command::Pkg(x) => x.run(),
+            CliCommand::Package(x) => x.run(),
         }
     }
 }

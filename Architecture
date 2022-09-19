@@ -1,0 +1,49 @@
+Architecture
+    package
+        detect platform
+        does config exist yet? no:
+            are there multiple choices per platform? yes:
+                prompt user for choice
+            save choice
+    package
+        args
+            add <pattern> | add remote packages/groups/meta to system matching pattern
+            find <pattern> | find installable packages/groups/meta matching pattern
+            list [pattern] | list installed packages/groups/meta optionally matching pattern
+            outdated [pattern] | list outdated packages/groups/meta optionally matching pattern
+            remove <pattern> | remove packages/groups/meta from system
+            upgrade [pattern] | upgrade installed packages/groups/meta optionally matching pattern
+        flags
+            admin [Y/n] | apply administrative privileges automatically
+            interactive [Y/n] | apply prompt defaults automatically
+            update [Y/n] | update repo lists automatically
+        notes
+            Linux
+                make sure your user has sudo access
+            Macos
+                make sure your user has sudo access
+            Windows
+                make sure your user is part of Administrators group
+
+
+packages
+    manager
+        if there are multiple options for your system, and you have not set a default, ctrl should ask, and save choice in config
+        ctrl can also be passed an optional argument to override the one from config file
+
+    operations
+        list
+        outdated
+        upgrade (update; )
+
+backups
+    manager
+        if there are multiple options for your system, and you have not set a default, ctrl should ask, and save choice in config
+        ctrl can also be passed an optional argument to override the one from config file
+
+    run
+        scheduled
+        on demand
+    group / profile name
+        list of files and folders
+        preserve permissions (if possible, else write out meta info??)

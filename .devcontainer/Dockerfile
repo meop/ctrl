@@ -1,7 +1,6 @@
-# base image
 FROM rust:1-slim-bullseye
 
-# for vs code remote tools
+# vs code remote
 RUN apt update && \
     apt -y install \
         git \

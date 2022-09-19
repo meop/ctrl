@@ -8,8 +8,8 @@ env:
   CARGO_TERM_COLOR: always
   
   # link C runtime statically
-  # so, especially on windows, extra C/C++ libs not required on OS
-  RUSTFLAGS: -C target-feature=+crt-static
+  # drop debuginfo and symbols
+  RUSTFLAGS: -C target-feature=+crt-static -C split=symbols
 
 jobs:
   create_release:
@@ -32,16 +32,28 @@ jobs:
         os: [macos-latest, ubuntu-latest, windows-latest]
         include:
           - os: macos-latest
-            release_copy: cp ctrl ctrl-darwin-x86_64
-            release_suffix: darwin-x86_64
+            binary: ctrl
+            release_binary: ctrl-darwin-aarch64
+            release_target: aarch64-apple-darwin
+          - os: macos-latest
+            binary: ctrl
+            release_binary: ctrl-darwin-x86_64
             release_target: x86_64-apple-darwin
           - os: ubuntu-latest
-            release_copy: cp ctrl ctrl-linux-x86_64
-            release_suffix: linux-x86_64
+            binary: ctrl
+            release_binary: ctrl-linux-aarch64
+            release_target: aarch64-unknown-linux-gnu
+          - os: ubuntu-latest
+            binary: ctrl
+            release_binary: ctrl-linux-x86_64
             release_target: x86_64-unknown-linux-gnu
           - os: windows-latest
-            release_copy: copy ctrl.exe ctrl-windows-x86_64.exe
-            release_suffix: windows-x86_64.exe
+            binary: ctrl.exe
+            release_binary: ctrl-windows-aarch64.exe
+            release_target: aarch64-pc-windows-msvc
+          - os: windows-latest
+            binary: ctrl.exe
+            release_binary: ctrl-windows-x86_64.exe
             release_target: x86_64-pc-windows-msvc
 
     steps:
@@ -56,14 +68,16 @@ jobs:
 
       - name: bundle
         working-directory: target/${{ matrix.release_target }}/release
-        run: ${{ matrix.release_copy }}
+        run: cp ${{ matrix.binary }} ${{ matrix.release_binary }}
 
       - name: release
         uses: softprops/action-gh-release@v1
         with:
           # as per getting static linking to work
-          # look inside target/ dir for release/ dir
-          # right now, only bunding the binary
+          # look inside target/ for release/
+          # right now, only bundling the binary
           # no config (with defaults), examples, etc
+          # inspired by rclone
           files: |
-            target/${{ matrix.release_target }}/release/ctrl-*
+            LICENSE
+            target/${{ matrix.release_target }}/release/${{ matrix.release_binary }}

@@ -1,0 +1,19 @@
+title = "CTRL config"
+
+[ctrl]
+uri = "https://github.com/meop/ctrl"
+
+[ctrl.backup]
+manager = "rclone"
+
+[ctrl.dotfile]
+manager = "git"
+
+[ctrl.package]
+manager = "homebrew"
+
+[rclone]
+
+[git]
+
+[homebrew]

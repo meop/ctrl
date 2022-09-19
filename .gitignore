@@ -1,9 +1,9 @@
-# os files
-.DS_Store
+# os
+**/.DS_Store
 
 # vs code
 .vscode
-.devcontainer
+!.vscode/launch.json
 
 # rust
 target/

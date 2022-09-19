@@ -1,8 +1,6 @@
 use std::process::ExitStatus;
 
-pub struct Pm;
-
-impl super::PackageManager for Pm {
+impl super::PackageManagerOps for super::PackageManager {
     fn add(&self, list: &Vec<String>, force: &bool) -> Result<ExitStatus, std::io::Error> {
         todo!()
     }
@@ -15,15 +13,15 @@ impl super::PackageManager for Pm {
         todo!()
     }
 
-    fn out(&self) -> Result<ExitStatus, std::io::Error> {
+    fn outdated(&self) -> Result<ExitStatus, std::io::Error> {
         todo!()
     }
 
-    fn rem(&self, list: &Vec<String>, force: &bool) -> Result<ExitStatus, std::io::Error> {
+    fn remove(&self, list: &Vec<String>, force: &bool) -> Result<ExitStatus, std::io::Error> {
         todo!()
     }
 
-    fn up(&self, list: &Vec<String>) -> Result<ExitStatus, std::io::Error> {
+    fn upgrade(&self, list: &Vec<String>) -> Result<ExitStatus, std::io::Error> {
         todo!()
     }
 }
