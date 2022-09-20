@@ -4,10 +4,30 @@ use std::fs::copy;
 use std::fs::File;
 use std::path::Path;
 
+use clap::Subcommand;
+use dialoguer::Confirm;
 use reqwest;
 use version_compare::Cmp;
 
-pub fn github() -> Result<(), Box<dyn Error>> {
+#[derive(Subcommand)]
+pub enum Command {
+    Upgrade {
+    },
+}
+
+pub trait Invoke {
+    fn run(&self) -> Result<(), Box<dyn Error>>;
+}
+
+impl Invoke for Command {
+    fn run(&self) -> Result<(), Box<dyn Error>> {
+        match self {
+            Command::Upgrade {} => upgrade(),
+        }
+    }
+}
+
+pub fn upgrade() -> Result<(), Box<dyn Error>> {
     let releases = self_update::backends::github::ReleaseList::configure()
         .repo_owner("meop")
         .repo_name("ctrl")
@@ -15,15 +35,22 @@ pub fn github() -> Result<(), Box<dyn Error>> {
         .fetch()?;
 
     if releases.len() == 0 {
-        log::info!("github: no releases found");
+        log::info!("no releases found");
         return Ok(());
     }
 
     let running_version = self_update::cargo_crate_version!();
-    let released_version = &releases[0].version;
+    let latest_version = &releases[0].version;
+    
+    log::info!("running version: {running_version}");
+    log::info!("latest version: {latest_version}");
 
-    if version_compare::compare_to(running_version, released_version, Cmp::Ge).unwrap() {
-        log::info!("github: running '{running_version}', latest release '{released_version}'");
+    if version_compare::compare_to(running_version, latest_version, Cmp::Ge).unwrap() {
+        log::info!("running version is already at or above latest version");
+        return Ok(());
+    }
+
+    if !Confirm::new().with_prompt("upgrade to latest version?").interact()? {
         return Ok(());
     }
 
@@ -55,7 +82,7 @@ pub fn github() -> Result<(), Box<dyn Error>> {
         self_update::Move::from_source(tmp_path)
             .to_dest(&cur_path)?;
     } else {
-        log::info!("github: '{binary}' not found in latest release '{released_version}'");
+        log::info!("latest version does not contain asset: {binary}");
         return Ok(());
     }
 

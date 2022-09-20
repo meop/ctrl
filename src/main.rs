@@ -8,10 +8,10 @@ use clap::Subcommand;
 use simple_logger::SimpleLogger;
 
 mod command;
-use command::Invoke;
+mod maintain;
+use maintain::Invoke as MaintainInvoke;
 mod package;
-use package::CliCommand as PackageCliCommand;
-mod self_update;
+use package::Invoke as PackageInvoke;
 
 #[derive(Parser)]
 #[clap(about, version)]
@@ -19,23 +19,24 @@ mod self_update;
 #[clap(global_setting(AppSettings::DisableHelpSubcommand))]
 struct Cli {
     #[clap(subcommand)]
-    command: CliCommand,
+    command: Command,
 }
 
 #[derive(Subcommand)]
-enum CliCommand {
+enum Command {
     Backup,
     #[clap(subcommand)]
-    Package(PackageCliCommand),
-    SelfUpdate,
+    Maintain(maintain::Command),
+    #[clap(subcommand)]
+    Package(package::Command),
 }
 
-impl CliCommand {
+impl Command {
     fn run(&self) -> Result<(), Box<dyn Error>> {
         match self {
-            CliCommand::Backup => Ok(()),
-            CliCommand::Package(x) => x.run().map(|_| ()).map_err(|e| e.into()),
-            CliCommand::SelfUpdate => self_update::github(),
+            Command::Backup => Ok(()),
+            Command::Package(c) => c.run().map(|_| ()).map_err(|e| e.into()),
+            Command::Maintain(c) => c.run(),
         }
     }
 }
@@ -43,6 +44,8 @@ impl CliCommand {
 fn main() {
     SimpleLogger::new()
         .with_level(LevelFilter::Info)
+        .with_colors(true)
+        .with_utc_timestamps()
         .init()
         .unwrap();
 

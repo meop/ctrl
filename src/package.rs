@@ -4,12 +4,10 @@ use std::process::ExitStatus;
 use clap::Subcommand;
 // use which::which;
 
-use crate::command::Invoke;
-
 mod homebrew;
 
 #[derive(Subcommand)]
-pub enum CliCommand {
+pub enum Command {
     Add {
         #[clap(multiple_values = true, required = true, help = "list")]
         list: Vec<String>,
@@ -38,6 +36,25 @@ pub enum CliCommand {
     },
 }
 
+pub trait Invoke {
+    fn run(&self) -> Result<ExitStatus, Error>;
+}
+
+impl Invoke for Command {
+    fn run(&self) -> Result<ExitStatus, Error> {
+        let pm = get_package_manager();
+
+        match self {
+            Command::Add { list, force } => pm.add(list, force),
+            Command::List { pattern } => pm.list(pattern),
+            Command::Outdated {} => pm.outdated(),
+            Command::Remove { list, force } => pm.remove(list, force),
+            Command::Search { pattern } => pm.search(pattern),
+            Command::Upgrade { list } => pm.upgrade(list),
+        }
+    }
+}
+
 pub trait Manager {
     fn add(&self, list: &Vec<String>, force: &bool) -> Result<ExitStatus, Error>;
     fn list(&self, pattern: &Option<String>) -> Result<ExitStatus, Error>;
@@ -47,7 +64,7 @@ pub trait Manager {
     fn upgrade(&self, list: &Vec<String>) -> Result<ExitStatus, Error>;
 }
 
-pub fn get_package_manager() -> Box<dyn Manager> {
+fn get_package_manager() -> Box<dyn Manager> {
     if cfg!(target_os = "macos") {
         Box::new(homebrew::Homebrew::default())
     // else if cfg!(target_os = "windows") {
@@ -64,20 +81,5 @@ pub fn get_package_manager() -> Box<dyn Manager> {
     //     }
     } else {
         panic!("not implemented!")
-    }
-}
-
-impl Invoke for CliCommand {
-    fn run(&self) -> Result<ExitStatus, Error> {
-        let pm = get_package_manager();
-
-        match self {
-            CliCommand::Add { list, force } => pm.add(list, force),
-            CliCommand::List { pattern } => pm.list(pattern),
-            CliCommand::Outdated {} => pm.outdated(),
-            CliCommand::Remove { list, force } => pm.remove(list, force),
-            CliCommand::Search { pattern } => pm.search(pattern),
-            CliCommand::Upgrade { list } => pm.upgrade(list),
-        }
     }
 }

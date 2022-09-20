@@ -8,22 +8,24 @@ categories = ["command-line-interface"]
 [dependencies]
 clap = { version = "^3", features = ["derive"] }
 config = { version = "^0" }
+dialoguer = { version = "^0" }
+indicatif = { version = "^0" }
 log = { version = "^0", features = ["std"] }
 serde = { version = "^1", features = ["derive"] }
 version-compare = { version = "^0" }
 which = { version = "^4"}
 
 [dependencies.reqwest]
-default-features = false
-features = ["rustls-tls"]
+# default-features = false
+# features = ["rustls-tls"]
 version = "^0"
 
 [dependencies.self_update]
-default-features = false
-features = ["rustls"]
+# default-features = false
+# features = ["rustls"]
 version = "^0"
 
 [dependencies.simple_logger]
-default-features = false
-features = ["colors", "timestamps"]
+# default-features = false
+# features = ["colors", "timestamps"]
 version = "^2"
