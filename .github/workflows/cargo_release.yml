@@ -4,18 +4,6 @@ on:
   push:
     tags: ["[0-9].[0-9]+.[0-9]+"]
 
-env:
-  # need to specify linker file name on linux only
-  # cargo finds linker for macos and windows on its own
-  CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
-  CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: aarch64-linux-gnu-gcc
-
-  CARGO_TERM_COLOR: always
-
-  # link C runtime statically
-  # drop debuginfo and symbols
-  RUSTFLAGS: -C target-feature=+crt-static -C strip=symbols
-
 jobs:
   create_release:
     runs-on: ubuntu-latest
@@ -51,12 +39,12 @@ jobs:
             os: ubuntu-latest
             binary: ctrl
             release_binary: ctrl-linux-aarch64
-            release_target: aarch64-unknown-linux-gnu
+            release_target: aarch64-unknown-linux-musl
           - arch: x86_64
             os: ubuntu-latest
             binary: ctrl
             release_binary: ctrl-linux-x86_64
-            release_target: x86_64-unknown-linux-gnu
+            release_target: x86_64-unknown-linux-musl
           - arch: aarch64
             os: windows-latest
             binary: ctrl.exe
@@ -69,34 +57,31 @@ jobs:
             release_target: x86_64-pc-windows-msvc
 
     steps:
-      - name: checkout
+      - name: Git checkout
         uses: actions/checkout@v3
 
-      - name: install GNU cross compiler / linker
+      - name: Install cross compile linker [Linux]
         run: sudo apt-get install -y gcc-aarch64-linux-gnu
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.arch == "aarch64" && matrix.os == 'ubuntu-latest' }}
 
-      - name: target
+      - name: Rust target add
         run: rustup target add ${{ matrix.release_target }}
 
       # to get static linking of C/C++ runtime to work
       # you must pass the target as itself
       # https://github.com/rust-lang/rust/issues/78210
-      - name: build
+      - name: Cargo build release
         run: cargo build --release --target=${{ matrix.release_target }}
 
-      - name: bundle
+      - name: Copy binary to new name
         working-directory: target/${{ matrix.release_target }}/release
         run: cp ${{ matrix.binary }} ${{ matrix.release_binary }}
 
-      - name: release
+      - name: Copy binary into release
         uses: softprops/action-gh-release@v1
         with:
-          # as per getting static linking to work
-          # look inside target/ for release/
-          # right now, only bundling the binary
-          # no config (with defaults), examples, etc
-          # inspired by rclone
+          # look inside target/ for release/ artifacts
+          # currently only bundling single binary
           files: |
             LICENSE
             target/${{ matrix.release_target }}/release/${{ matrix.release_binary }}
