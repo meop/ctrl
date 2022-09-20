@@ -62,7 +62,7 @@ jobs:
 
       - name: Install cross compile linker [Linux]
         run: sudo apt-get install -y gcc-aarch64-linux-gnu
-        if: ${{ matrix.arch == "aarch64" && matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.arch == 'aarch64' && matrix.os == 'ubuntu-latest' }}
 
       - name: Rust target add
         run: rustup target add ${{ matrix.release_target }}
