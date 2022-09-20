@@ -1,5 +1,5 @@
-use std::io::Error;
-use std::process::ExitStatus;
+use log::LevelFilter;
+use std::error::Error;
 
 use clap::AppSettings;
 use clap::Parser;
@@ -11,6 +11,7 @@ mod command;
 use command::Invoke;
 mod package;
 use package::CliCommand as PackageCliCommand;
+mod self_update;
 
 #[derive(Parser)]
 #[clap(about, version)]
@@ -23,20 +24,27 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum CliCommand {
+    Backup,
     #[clap(subcommand)]
     Package(PackageCliCommand),
+    SelfUpdate,
 }
 
-impl Invoke for CliCommand {
-    fn run(&self) -> Result<ExitStatus, Error> {
+impl CliCommand {
+    fn run(&self) -> Result<(), Box<dyn Error>> {
         match self {
-            CliCommand::Package(x) => x.run(),
+            CliCommand::Backup => Ok(()),
+            CliCommand::Package(x) => x.run().map(|_| ()).map_err(|e| e.into()),
+            CliCommand::SelfUpdate => self_update::github(),
         }
     }
 }
 
 fn main() {
-    SimpleLogger::new().init().unwrap();
+    SimpleLogger::new()
+        .with_level(LevelFilter::Info)
+        .init()
+        .unwrap();
 
     let args = Cli::parse();
     let command = args.command;

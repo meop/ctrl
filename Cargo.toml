@@ -1,6 +1,6 @@
 [package]
 name = "ctrl"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 description = "CLI tool for cross platform OS management"
 categories = ["command-line-interface"]
@@ -8,15 +8,14 @@ categories = ["command-line-interface"]
 [dependencies]
 clap = { version = "^3", features = ["derive"] }
 config = { version = "^0" }
-serde = { version = "^1", features = ["derive"] }
-which = { version = "^4"}
-
-# simple_logger needs this
 log = { version = "^0", features = ["std"] }
+reqwest = { version = "^0"}
+self_update = { version = "^0"}
+serde = { version = "^1", features = ["derive"] }
+version-compare = { version = "^0" }
+which = { version = "^4"}
 
 [dependencies.simple_logger]
 default-features = false
-
-# no timestamps for now
-features = ["colors"]
+features = ["colors", "timestamps"]
 version = "^2"
