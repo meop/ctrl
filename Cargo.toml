@@ -9,11 +9,19 @@ categories = ["command-line-interface"]
 clap = { version = "^3", features = ["derive"] }
 config = { version = "^0" }
 log = { version = "^0", features = ["std"] }
-reqwest = { version = "^0"}
-self_update = { version = "^0"}
 serde = { version = "^1", features = ["derive"] }
 version-compare = { version = "^0" }
 which = { version = "^4"}
+
+[dependencies.reqwest]
+default-features = false
+features = ["rustls-tls"]
+version = "^0"
+
+[dependencies.self_update]
+default-features = false
+features = ["rustls"]
+version = "^0"
 
 [dependencies.simple_logger]
 default-features = false
