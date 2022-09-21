@@ -5,7 +5,7 @@ on:
     tags: ["[0-9].[0-9]+.[0-9]+"]
 
 env:
-  RUSTFLAGS: -C target-feature=+crt-static -C strip=symbols
+  RUSTFLAGS: -C target-feature=+crt-static -C strip=symbols -C codegen-units=1 -C panic=abort
 
 jobs:
   create_release:
@@ -70,9 +70,6 @@ jobs:
       - name: Rust target add
         run: rustup target add ${{ matrix.release_target }}
 
-      # to get static linking of C/C++ runtime to work
-      # you must pass the target as itself
-      # https://github.com/rust-lang/rust/issues/78210
       - name: Cargo build release
         run: cargo build --release --target=${{ matrix.release_target }}
 
@@ -83,8 +80,6 @@ jobs:
       - name: Copy binary into release
         uses: softprops/action-gh-release@v1
         with:
-          # look inside target/ for release/ artifacts
-          # currently only bundling single binary
           files: |
             LICENSE
             target/${{ matrix.release_target }}/release/${{ matrix.release_binary }}
