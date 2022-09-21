@@ -20,7 +20,8 @@
                 }
             },
             "args": [
-                "self-update"
+                "maintain",
+                "upgrade"
             ],
             "cwd": "${workspaceFolder}"
         },
