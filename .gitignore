@@ -2,7 +2,7 @@
 **/.DS_Store
 
 # vs code
-.vscode
+.vscode/*
 !.vscode/launch.json
 
 # rust
