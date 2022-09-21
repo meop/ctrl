@@ -42,6 +42,8 @@ impl Command {
 }
 
 fn main() {
+    openssl_probe::init_ssl_cert_env_vars();
+
     SimpleLogger::new()
         .with_level(LevelFilter::Info)
         .with_colors(true)

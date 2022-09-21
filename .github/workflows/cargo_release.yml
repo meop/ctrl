@@ -4,9 +4,6 @@ on:
   push:
     tags: ["[0-9].[0-9]+.[0-9]+"]
 
-env:
-  RUSTFLAGS: -C target-feature=+crt-static -C strip=symbols -C codegen-units=1 -C panic=abort
-
 jobs:
   create_release:
     runs-on: ubuntu-latest

@@ -10,11 +10,18 @@ clap = { version = "^3", features = ["derive"] }
 config = { version = "^0" }
 dialoguer = { version = "^0" }
 indicatif = { version = "^0" }
-log = { version = "^0", features = ["std"] }
+log = { version = "^0", features = ["std", "serde"] }
 openssl = { version = "^0", features = ["vendored"] }
+openssl-probe = { version = "^0" }
 reqwest = { version = "^0" }
 self_update = { version = "^0" }
 serde = { version = "^1", features = ["derive"] }
 simple_logger = { version = "^2" }
 version-compare = { version = "^0" }
 which = { version = "^4"}
+
+[profile.release]
+codegen-units = 1
+lto = "fat"
+panic = "abort"
+strip = "symbols"
