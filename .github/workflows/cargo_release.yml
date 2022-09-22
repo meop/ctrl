@@ -9,12 +9,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: create release
+      - name: Create release
         uses: softprops/action-gh-release@v1
         with:
           draft: false
-          prerelease: false
           generate_release_notes: false
+          prerelease: false
+          files: |
+            LICENSE
 
   build_release:
     needs: create_release
@@ -78,5 +80,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            LICENSE
             target/${{ matrix.release_target }}/release/${{ matrix.release_binary }}
