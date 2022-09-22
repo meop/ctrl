@@ -16,15 +16,15 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           draft: false
-          files: |
-            LICENSE
           generate_release_notes: false
           prerelease: false
+          files: |
+            LICENSE
 
-  build_release:
+  populate_release:
+    runs-on: ${{ matrix.os }}
     needs: create_release
 
-    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         arch: [aarch64, x86_64]
@@ -65,7 +65,7 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@v3
 
-      - name: Install cross compile linker [Linux]
+      - name: Install GNU GCC for aarch64 [Linux]
         run: sudo apt-get install -y gcc-aarch64-linux-gnu
         if: ${{ matrix.arch == 'aarch64' && matrix.os == 'ubuntu-latest' }}
 
@@ -76,8 +76,8 @@ jobs:
         run: cargo build --release --target=${{ matrix.release_target }}
 
       - name: Copy binary to new name
-        working-directory: target/${{ matrix.release_target }}/release
         run: cp ${{ matrix.binary }} ${{ matrix.release_binary }}
+        working-directory: target/${{ matrix.release_target }}/release
 
       - name: Copy binary into release
         uses: softprops/action-gh-release@v1
