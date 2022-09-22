@@ -1,4 +1,4 @@
-name: Cargo Release
+name: Release
 
 on:
   push:
