@@ -16,8 +16,8 @@ use winget::Winget;
 pub(super) enum Command {
     /// Add new package(s)
     Add {
-        /// List of packages
-        #[clap(multiple_values = true, required = true, help = "list")]
+        /// List of packages [required]
+        #[clap(multiple_values = true, required = true)]
         list: Vec<String>,
     },
 
@@ -26,7 +26,6 @@ pub(super) enum Command {
 
     /// List installed package(s)
     List {
-        #[clap(help = "pattern")]
         /// Optional pattern to match
         pattern: Option<String>,
     },
@@ -36,22 +35,21 @@ pub(super) enum Command {
 
     /// Remove installed package(s)
     Remove {
-        /// List of packages
-        #[clap(multiple_values = true, required = true, help = "list")]
+        /// List of packages [required]
+        #[clap(multiple_values = true, required = true)]
         list: Vec<String>,
     },
     
     /// Search for remote package(s)
     Search {
         /// Optional pattern to match
-        #[clap(help = "pattern")]
         pattern: String,
     },
     
     /// Sync latest installed package(s)
     Sync {
-        /// List of packages
-        #[clap(multiple_values = true, help = "list")]
+        /// List of packages [optional]
+        #[clap(multiple_values = true)]
         list: Vec<String>,
     },
 }

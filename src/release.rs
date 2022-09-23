@@ -13,11 +13,12 @@ use crate::log::logcln;
 use crate::log::Category;
 
 #[derive(Subcommand)]
-pub(crate) enum Command {
+pub(super) enum Command {
+    /// Upgrade to latest release
     Upgrade {},
 }
 
-pub(crate) trait Invoke {
+pub(super) trait Invoke {
     fn run(&self) -> Result<(), Box<dyn Error>>;
 }
 

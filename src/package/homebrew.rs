@@ -1,6 +1,7 @@
 use std::io::Error;
 
 use crate::command::run_and_wait;
+use crate::file::exists_in_path;
 
 use super::cmd_args;
 use super::cmd_flag_long;
@@ -8,7 +9,13 @@ use super::Manager;
 
 pub(super) struct Homebrew;
 
-static PROGRAM: &str = "brew";
+fn get_program() -> String {
+    if exists_in_path("brew") {
+        "brew".to_string()
+    } else {
+        panic!("no homebrew compatible program found in path")
+    }
+}
 
 fn fix_fs_perm() -> Result<(), Error> {
     run_and_wait(
@@ -21,18 +28,20 @@ impl Manager for Homebrew {
     fn add(&self, list: &Vec<String>) -> Result<(), Error> {
         fix_fs_perm()?;
         run_and_wait(&format!(
-            "{PROGRAM} install {}",
+            "{} install {}",
+            get_program(),
             cmd_args(list),
         ))
     }
 
     fn clean(&self) -> Result<(), Error> {
-        run_and_wait(&format!("{PROGRAM} cleanup"))
+        run_and_wait(&format!("{} cleanup", get_program()))
     }
 
     fn list(&self, pattern: &Option<String>) -> Result<(), Error> {
         run_and_wait(&format!(
-            "{PROGRAM} list {}",
+            "{} list {}",
+            get_program(),
             if pattern.as_deref().is_some() {
                 String::from(pattern.as_deref().unwrap())
             } else {
@@ -42,25 +51,27 @@ impl Manager for Homebrew {
     }
 
     fn old(&self) -> Result<(), Error> {
-        run_and_wait(&format!("{PROGRAM} outdated"))
+        run_and_wait(&format!("{} outdated", get_program()))
     }
 
     fn remove(&self, list: &Vec<String>) -> Result<(), Error> {
         fix_fs_perm()?;
         run_and_wait(&format!(
-            "{PROGRAM} uninstall {}",
+            "{} uninstall {}",
+            get_program(),
             cmd_args(list),
         ))
     }
     
     fn search(&self, pattern: &String) -> Result<(), Error> {
-        run_and_wait(&format!("{PROGRAM} search {}", pattern))
+        run_and_wait(&format!("{} search {}", get_program(), pattern))
     }
     
     fn sync(&self, list: &Vec<String>) -> Result<(), Error> {
         fix_fs_perm()?;
         run_and_wait(&format!(
-            "{PROGRAM} upgrade {} {}",
+            "{} upgrade {} {}",
+            get_program(),
             cmd_flag_long("greedy"),
             cmd_args(list),
         ))

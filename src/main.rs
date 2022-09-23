@@ -4,9 +4,10 @@ use clap::AppSettings;
 use clap::Parser;
 use clap::Subcommand;
 
+mod command;
+mod file;
 mod log;
 
-mod command;
 mod package;
 use package::Invoke as PackageInvoke;
 mod release;

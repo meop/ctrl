@@ -20,6 +20,7 @@ self_update = { version = "^0" }
 # serde = { version = "^1", features = ["derive"] }
 # simple_logger = { version = "^2" }
 version-compare = { version = "^0" }
+which = { version = "^4" }
 
 [profile.release]
 codegen-units = 1

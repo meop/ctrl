@@ -1,6 +1,7 @@
 use std::io::Error;
 
 use crate::command::run_and_wait;
+use crate::file::exists_in_path;
 
 use super::cmd_args;
 use super::cmd_flag_long;
@@ -8,11 +9,17 @@ use super::Manager;
 
 pub(super) struct Winget;
 
-static PROGRAM: &str = "winget";
+fn get_program() -> String {
+    if exists_in_path("winget") {
+        "winget".to_string()
+    } else {
+        panic!("no winget compatible program found in path")
+    }
+}
 
 impl Manager for Winget {
     fn add(&self, list: &Vec<String>) -> Result<(), Error> {
-        run_and_wait(&format!("{PROGRAM} install {}", cmd_args(list)))
+        run_and_wait(&format!("{} install {}", get_program(), cmd_args(list)))
     }
 
     fn clean(&self) -> Result<(), Error> {
@@ -21,7 +28,8 @@ impl Manager for Winget {
 
     fn list(&self, pattern: &Option<String>) -> Result<(), Error> {
         run_and_wait(&format!(
-            "{PROGRAM} list {}",
+            "{} list {}",
+            get_program(),
             if pattern.as_deref().is_some() {
                 format!("| sls {}", String::from(pattern.as_deref().unwrap()))
             } else {
@@ -31,20 +39,21 @@ impl Manager for Winget {
     }
 
     fn old(&self) -> Result<(), Error> {
-        run_and_wait(&format!("{PROGRAM} upgrade"))
+        run_and_wait(&format!("{} upgrade", get_program()))
     }
-    
+
     fn remove(&self, list: &Vec<String>) -> Result<(), Error> {
-        run_and_wait(&format!("{PROGRAM} uninstall {}", cmd_args(list)))
+        run_and_wait(&format!("{} uninstall {}", get_program(), cmd_args(list)))
     }
-    
+
     fn search(&self, pattern: &String) -> Result<(), Error> {
-        run_and_wait(&format!("{PROGRAM} search {}", pattern))
+        run_and_wait(&format!("{} search {}", get_program(), pattern))
     }
 
     fn sync(&self, list: &Vec<String>) -> Result<(), Error> {
         run_and_wait(&format!(
-            "{PROGRAM} upgrade {}",
+            "{} upgrade {}",
+            get_program(),
             if list.len() > 0 {
                 cmd_args(list)
             } else {
