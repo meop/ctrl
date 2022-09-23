@@ -9,13 +9,15 @@ use dialoguer::Confirm;
 use reqwest;
 use version_compare::Cmp;
 
+use crate::log::logcln;
+use crate::log::Category;
+
 #[derive(Subcommand)]
-pub enum Command {
-    Upgrade {
-    },
+pub(crate) enum Command {
+    Upgrade {},
 }
 
-pub trait Invoke {
+pub(crate) trait Invoke {
     fn run(&self) -> Result<(), Box<dyn Error>>;
 }
 
@@ -27,7 +29,7 @@ impl Invoke for Command {
     }
 }
 
-pub fn upgrade() -> Result<(), Box<dyn Error>> {
+fn upgrade() -> Result<(), Box<dyn Error>> {
     let releases = self_update::backends::github::ReleaseList::configure()
         .repo_owner("meop")
         .repo_name("ctrl")
@@ -35,22 +37,31 @@ pub fn upgrade() -> Result<(), Box<dyn Error>> {
         .fetch()?;
 
     if releases.len() == 0 {
-        log::info!("no releases found");
+        logcln("no releases found", Category::Info);
         return Ok(());
     }
 
     let running_version = self_update::cargo_crate_version!();
     let latest_version = &releases[0].version;
-    
-    log::info!("running version: {running_version}");
-    log::info!("latest version: {latest_version}");
+
+    logcln(
+        &format!("running version: {running_version}"),
+        Category::Info,
+    );
+    logcln(&format!("latest version: {latest_version}"), Category::Info);
 
     if version_compare::compare_to(running_version, latest_version, Cmp::Ge).unwrap() {
-        log::info!("running version is already at or above latest version");
+        logcln(
+            "running version is already at or above latest version",
+            Category::Info,
+        );
         return Ok(());
     }
 
-    if !Confirm::new().with_prompt("upgrade to latest version?").interact()? {
+    if !Confirm::new()
+        .with_prompt("upgrade to latest version?")
+        .interact()?
+    {
         return Ok(());
     }
 
@@ -85,7 +96,10 @@ pub fn upgrade() -> Result<(), Box<dyn Error>> {
             .replace_using_temp(&bak_path)
             .to_dest(&cur_path)?;
     } else {
-        log::info!("latest version does not contain asset: {binary}");
+        logcln(
+            &format!("latest version does not contain asset: {binary}"),
+            Category::Info,
+        );
         return Ok(());
     }
 

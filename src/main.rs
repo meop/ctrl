@@ -1,17 +1,16 @@
-use log::LevelFilter;
 use std::error::Error;
 
 use clap::AppSettings;
 use clap::Parser;
 use clap::Subcommand;
 
-use simple_logger::SimpleLogger;
+mod log;
 
 mod command;
-mod maintain;
-use maintain::Invoke as MaintainInvoke;
 mod package;
 use package::Invoke as PackageInvoke;
+mod release;
+use release::Invoke as ReleaseInvoke;
 
 #[derive(Parser)]
 #[clap(about, version)]
@@ -24,11 +23,16 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
+    /// FS backup commands
     Backup,
-    #[clap(subcommand)]
-    Maintain(maintain::Command),
+
+    /// OS package commands
     #[clap(subcommand)]
     Package(package::Command),
+
+    /// Self release commands
+    #[clap(subcommand)]
+    Release(release::Command),
 }
 
 impl Command {
@@ -36,20 +40,13 @@ impl Command {
         match self {
             Command::Backup => Ok(()),
             Command::Package(c) => c.run().map(|_| ()).map_err(|e| e.into()),
-            Command::Maintain(c) => c.run(),
+            Command::Release(c) => c.run(),
         }
     }
 }
 
 fn main() {
     openssl_probe::init_ssl_cert_env_vars();
-
-    SimpleLogger::new()
-        .with_level(LevelFilter::Info)
-        .with_colors(true)
-        .with_utc_timestamps()
-        .init()
-        .unwrap();
 
     let args = Cli::parse();
     let command = args.command;

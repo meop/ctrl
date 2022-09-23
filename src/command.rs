@@ -1,8 +1,11 @@
 use std::io::Error;
 use std::process::Command;
-use std::process::ExitStatus;
 
-pub fn run_and_wait(command: &String) -> Result<ExitStatus, Error> {
+use crate::log::Category;
+use crate::log::logc;
+use crate::log::logcln;
+
+pub(crate) fn run_and_wait(command: &String) -> Result<(), Error> {
     let mut shell = "sh";
     let mut shell_arg = "-c";
 
@@ -11,10 +14,12 @@ pub fn run_and_wait(command: &String) -> Result<ExitStatus, Error> {
         shell_arg = "/C";
     }
 
-    log::info!("{shell} {shell_arg} {command}");
+    logc(&format!("{shell} {shell_arg} "), Category::Cmd);
+    logcln(command, Category::Arg);
 
     Command::new(shell)
         .arg(shell_arg)
         .arg(command)
-        .status()
+        .status()?;
+    Ok(())
 }
