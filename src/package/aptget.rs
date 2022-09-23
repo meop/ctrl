@@ -74,11 +74,11 @@ impl Manager for Aptget {
             if list.len() > 0 {
                 format!("install {}", cmd_args(list))
             } else {
-                cmd_flag_long(if program == "apt" {
-                    "full-upgrade"
+                if program.ends_with("apt") {
+                    "full-upgrade".to_string()
                 } else {
-                    "dist-upgrade"
-                })
+                    "dist-upgrade".to_string()
+                }
             }
         ))
     }
