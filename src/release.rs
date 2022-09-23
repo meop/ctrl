@@ -1,4 +1,3 @@
-use std::env::current_exe;
 use std::error::Error;
 use std::fs::copy;
 use std::fs::File;
@@ -9,11 +8,15 @@ use dialoguer::Confirm;
 use reqwest;
 use version_compare::Cmp;
 
+use crate::file::get_cur_path_str;
 use crate::log::logcln;
 use crate::log::Category;
 
 #[derive(Subcommand)]
 pub(super) enum Command {
+    /// Revert with local backup release
+    Revert {},
+
     /// Sync latest release
     Sync {},
 }
@@ -25,9 +28,44 @@ pub(super) trait Invoke {
 impl Invoke for Command {
     fn run(&self) -> Result<(), Box<dyn Error>> {
         match self {
+            Command::Revert {} => revert(),
             Command::Sync {} => sync(),
         }
     }
+}
+
+fn get_bak_path_str(prefix: &str) -> String {
+    format!("{}.bak", prefix)
+}
+
+fn get_tmp_path_str(prefix: &str) -> String {
+    format!("{}.tmp", prefix)
+}
+
+fn revert() -> Result<(), Box<dyn Error>> {
+    let cur_path_str = get_cur_path_str()?;
+
+    let bak_path_str = get_bak_path_str(&cur_path_str);
+    let tmp_path_str = get_tmp_path_str(&cur_path_str);
+
+    if !Path::new(&bak_path_str).exists() {
+        logcln("no backup to revert", Category::Info);
+        return Ok(());
+    }
+
+    if !Confirm::new()
+        .with_prompt("revert to backup version?")
+        .interact()?
+    {
+        return Ok(());
+    }
+
+    self_update::Move::from_source(Path::new(&bak_path_str))
+        // windows requires this; unix is optional
+        .replace_using_temp(Path::new(&tmp_path_str))
+        .to_dest(Path::new(&cur_path_str))?;
+
+    Ok(())
 }
 
 fn sync() -> Result<(), Box<dyn Error>> {
@@ -72,30 +110,25 @@ fn sync() -> Result<(), Box<dyn Error>> {
 
     let binary = format!("ctrl-{sys}-{arch}");
     if let Some(asset) = releases[0].asset_for(&binary) {
-        let cur_path = current_exe()?;
-        let cur_path_str = cur_path.to_str().unwrap().to_string();
+        let cur_path_str = get_cur_path_str()?;
 
-        let tmp_path_str = format!("{}.tmp", &cur_path_str);
-        let tmp_path = Path::new(&tmp_path_str);
-
-        // windows allows you to rename a running program file, not delete
-        // but having a backup to revert is good anyway
-        let bak_path_str = format!("{}.bak", &cur_path_str);
-        let bak_path = Path::new(&bak_path_str);
+        let bak_path_str = get_bak_path_str(&cur_path_str);
+        let tmp_path_str = get_tmp_path_str(&cur_path_str);
 
         // copying preserves fs permissions
-        copy(&cur_path, &tmp_path)?;
+        copy(&cur_path_str, &tmp_path_str)?;
 
         // create will then truncate the existing file
-        let tmp_path_file = File::create(tmp_path)?;
+        let tmp_path_file = File::create(&tmp_path_str)?;
 
         self_update::Download::from_url(&asset.download_url)
             .set_header(reqwest::header::ACCEPT, "application/octet-stream".parse()?)
             .download_to(&tmp_path_file)?;
 
-        self_update::Move::from_source(tmp_path)
-            .replace_using_temp(&bak_path)
-            .to_dest(&cur_path)?;
+        self_update::Move::from_source(Path::new(&tmp_path_str))
+            // windows requires this; unix is optional
+            .replace_using_temp(Path::new(&bak_path_str))
+            .to_dest(Path::new(&cur_path_str))?;
     } else {
         logcln(
             &format!("latest version does not contain asset: {binary}"),
