@@ -24,7 +24,7 @@ pub(super) enum Command {
     /// Clean local cache
     Clean {},
 
-    /// List installed package(s)
+    /// List local installed package(s)
     List {
         /// Optional pattern to match
         pattern: Option<String>,
@@ -33,7 +33,7 @@ pub(super) enum Command {
     /// List out-of-date installed packages
     Old {},
 
-    /// Remove installed package(s)
+    /// Remove local installed package(s)
     Remove {
         /// List of packages [required]
         #[clap(multiple_values = true, required = true)]
@@ -46,7 +46,7 @@ pub(super) enum Command {
         pattern: String,
     },
     
-    /// Sync latest installed package(s)
+    /// Sync to latest installed package(s)
     Sync {
         /// List of packages [optional]
         #[clap(multiple_values = true)]

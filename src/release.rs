@@ -14,10 +14,10 @@ use crate::log::Category;
 
 #[derive(Subcommand)]
 pub(super) enum Command {
-    /// Revert with local backup release
+    /// Revert to local backup release
     Revert {},
 
-    /// Sync latest release
+    /// Sync to latest release
     Sync {},
 }
 
