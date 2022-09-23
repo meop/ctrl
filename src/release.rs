@@ -14,8 +14,8 @@ use crate::log::Category;
 
 #[derive(Subcommand)]
 pub(super) enum Command {
-    /// Upgrade to latest release
-    Upgrade {},
+    /// Sync latest release
+    Sync {},
 }
 
 pub(super) trait Invoke {
@@ -25,12 +25,12 @@ pub(super) trait Invoke {
 impl Invoke for Command {
     fn run(&self) -> Result<(), Box<dyn Error>> {
         match self {
-            Command::Upgrade {} => upgrade(),
+            Command::Sync {} => sync(),
         }
     }
 }
 
-fn upgrade() -> Result<(), Box<dyn Error>> {
+fn sync() -> Result<(), Box<dyn Error>> {
     let releases = self_update::backends::github::ReleaseList::configure()
         .repo_owner("meop")
         .repo_name("ctrl")
