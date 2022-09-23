@@ -55,6 +55,7 @@ fn revert() -> Result<(), Box<dyn Error>> {
 
     if !Confirm::new()
         .with_prompt("revert to backup version?")
+        .default(true)
         .interact()?
     {
         return Ok(());
@@ -99,6 +100,7 @@ fn sync() -> Result<(), Box<dyn Error>> {
 
     if !Confirm::new()
         .with_prompt("upgrade to latest version?")
+        .default(true)
         .interact()?
     {
         return Ok(());
