@@ -5,10 +5,11 @@ use os_info::Type;
 
 mod aptget;
 use aptget::Aptget;
-mod pacman;
-use pacman::Pacman;
 mod homebrew;
 use homebrew::Homebrew;
+mod pacman;
+use pacman::Pacman;
+
 mod winget;
 use winget::Winget;
 
@@ -39,13 +40,13 @@ pub(super) enum Command {
         #[clap(multiple_values = true, required = true)]
         list: Vec<String>,
     },
-    
+
     /// Search for remote package(s)
     Search {
         /// Optional pattern to match
         pattern: String,
     },
-    
+
     /// Sync to latest installed package(s)
     Sync {
         /// List of packages [optional]
@@ -88,7 +89,9 @@ fn get_manager() -> Box<dyn Manager> {
     let os_type = os_info::get().os_type();
     match os_type {
         Type::Arch | Type::Manjaro => Box::new(Pacman),
-        Type::Debian | Type::Mint | Type::Raspbian | Type::Ubuntu => Box::new(Aptget),
+        Type::Android | Type::Debian | Type::Mint | Type::Raspbian | Type::Ubuntu => {
+            Box::new(Aptget)
+        }
         Type::Macos => Box::new(Homebrew),
         Type::Windows => Box::new(Winget),
         _ => panic!("not yet supported: {os_type}"),
