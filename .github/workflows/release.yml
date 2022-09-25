@@ -27,60 +27,85 @@ jobs:
 
     strategy:
       matrix:
-        arch: [aarch64, x86_64]
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        target:
+          - aarch64-apple-ios
+          - aarch64-linux-android
+
+          - aarch64-apple-darwin
+          - aarch64-unknown-linux-gnu
+          - aarch64-pc-windows-msvc
+
+          - x86_64-apple-darwin
+          - x86_64-pc-windows-msvc
+          - x86_64-unknown-linux-gnu
+
         include:
-          - arch: aarch64
+          - target: aarch64-apple-ios
             os: macos-latest
             binary: ctrl
-            release_binary: ctrl-darwin-aarch64
-            release_target: aarch64-apple-darwin
-          - arch: x86_64
+            binary-new: ctrl-ios-aarch64
+          - target: aarch64-linux-android
+            os: ubuntu-latest
+            binary: ctrl
+            binary-new: ctrl-android-aarch64
+
+          - target: aarch64-apple-darwin
             os: macos-latest
             binary: ctrl
-            release_binary: ctrl-darwin-x86_64
-            release_target: x86_64-apple-darwin
-          - arch: aarch64
+            binary-new: ctrl-macos-aarch64
+          - target: aarch64-unknown-linux-gnu
             os: ubuntu-latest
             binary: ctrl
-            release_binary: ctrl-linux-aarch64
-            release_target: aarch64-unknown-linux-gnu
-          - arch: x86_64
+            binary-new: ctrl-linux-aarch64
+          - target: aarch64-pc-windows-msvc
+            os: windows-latest
+            binary: ctrl.exe
+            binary-new: ctrl-windows-aarch64.exe
+
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            binary: ctrl
+            binary-new: ctrl-macos-x86_64
+          - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
             binary: ctrl
-            release_binary: ctrl-linux-x86_64
-            release_target: x86_64-unknown-linux-gnu
-          - arch: aarch64
+            binary-new: ctrl-linux-x86_64
+          - target: x86_64-pc-windows-msvc
             os: windows-latest
             binary: ctrl.exe
-            release_binary: ctrl-windows-aarch64.exe
-            release_target: aarch64-pc-windows-msvc
-          - arch: x86_64
-            os: windows-latest
-            binary: ctrl.exe
-            release_binary: ctrl-windows-x86_64.exe
-            release_target: x86_64-pc-windows-msvc
+            binary-new: ctrl-windows-x86_64.exe
 
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
 
-      - name: Install GNU GCC for aarch64 [Linux]
+      - name: Patch Android NDK linker [Android (aarch64)]
+        run: bash scripts/patch_android_ndk_libgcc.sh
+        if: ${{ matrix.target == 'aarch64-linux-android' }}
+
+      - name: Set Android NDK linker path [Android (aarch64)]
+        run: export PATH=$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+        if: ${{ matrix.target == 'aarch64-linux-android' }}
+
+      - name: Install GNU GCC linker [Linux (aarch64)]
         run: sudo apt-get install -y gcc-aarch64-linux-gnu
-        if: ${{ matrix.arch == 'aarch64' && matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.target == 'aarch64-unknown-linux-gnu' }}
 
       - name: Rust target add
-        run: rustup target add ${{ matrix.release_target }}
+        run: rustup target add ${{ matrix.target }}
 
       - name: Cargo build release
-        run: cargo build --release --target=${{ matrix.release_target }}
+        # specifying --target is required for Rust linking
+        # when cross compiling, building stdlib from source, etc
+        # https://github.com/rust-lang/rust/issues/78210
+        run: cargo build --release --target=${{ matrix.target }}
 
       - name: Copy binary to new name
-        run: cp ${{ matrix.binary }} ${{ matrix.release_binary }}
-        working-directory: target/${{ matrix.release_target }}/release
+        run: cp ${{ matrix.binary }} ${{ matrix.binary-new }}
+        working-directory: target/${{ matrix.target }}/release
 
       - name: Copy binary into release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            target/${{ matrix.release_target }}/release/${{ matrix.release_binary }}
+            target/${{ matrix.target }}/release/${{ matrix.binary-new }}
