@@ -106,12 +106,9 @@ fn sync() -> Result<(), Box<dyn Error>> {
         return Ok(());
     }
 
-    let target: Vec<&str> = self_update::get_target().split('-').collect();
-    let arch = target[0];
-    let sys = target[2];
+    let target = self_update::get_target();
 
-    let binary = format!("ctrl-{sys}-{arch}");
-    if let Some(asset) = releases[0].asset_for(&binary) {
+    if let Some(asset) = releases[0].asset_for(target) {
         let cur_path_str = get_cur_path_str()?;
 
         let bak_path_str = get_bak_path_str(&cur_path_str);
@@ -133,7 +130,7 @@ fn sync() -> Result<(), Box<dyn Error>> {
             .to_dest(Path::new(&cur_path_str))?;
     } else {
         logcln(
-            &format!("latest version does not contain asset: {binary}"),
+            &format!("latest version does not contain target: {target}"),
             Category::Info,
         );
         return Ok(());
