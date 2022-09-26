@@ -92,8 +92,8 @@ jobs:
         # https://github.com/rust-lang/rust/issues/78210
         run: cargo build --release --target=${{ matrix.target }}
 
-      - name: Copy binary to new name
-        run: cp ${{ matrix.binary }} ${{ matrix.target }}-${{ matrix.binary }}
+      - name: Rename binary
+        run: mv ${{ matrix.binary }} ${{ matrix.target }}-${{ matrix.binary }}
         working-directory: target/${{ matrix.target }}/release
 
       - name: Copy binary into release

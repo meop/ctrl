@@ -106,9 +106,9 @@ fn sync() -> Result<(), Box<dyn Error>> {
         return Ok(());
     }
 
-    let target = self_update::get_target();
+    let binary = format!("{}-ctrl", self_update::get_target());
 
-    if let Some(asset) = releases[0].asset_for(target) {
+    if let Some(asset) = releases[0].asset_for(&binary) {
         let cur_path_str = get_cur_path_str()?;
 
         let bak_path_str = get_bak_path_str(&cur_path_str);
@@ -130,7 +130,7 @@ fn sync() -> Result<(), Box<dyn Error>> {
             .to_dest(Path::new(&cur_path_str))?;
     } else {
         logcln(
-            &format!("latest version does not contain target: {target}"),
+            &format!("latest version does not contain target: {binary}"),
             Category::Info,
         );
         return Ok(());
