@@ -50,16 +50,11 @@ impl Manager for Pacman {
         ))
     }
 
-    fn list(&self, pattern: &Option<String>) -> Result<(), Error> {
+    fn list(&self) -> Result<(), Error> {
         run_and_wait(&format!(
-            "{} {} {}",
+            "{} {}",
             get_program(),
             cmd_flag_long("query"),
-            if pattern.as_deref().is_some() {
-                format!("| grep {}", String::from(pattern.as_deref().unwrap()))
-            } else {
-                String::new()
-            }
         ))
     }
 

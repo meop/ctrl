@@ -38,15 +38,10 @@ impl Manager for Homebrew {
         run_and_wait(&format!("{} cleanup", get_program()))
     }
 
-    fn list(&self, pattern: &Option<String>) -> Result<(), Error> {
+    fn list(&self) -> Result<(), Error> {
         run_and_wait(&format!(
-            "{} list {}",
+            "{} list",
             get_program(),
-            if pattern.as_deref().is_some() {
-                String::from(pattern.as_deref().unwrap())
-            } else {
-                String::new()
-            }
         ))
     }
 

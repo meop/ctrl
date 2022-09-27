@@ -10,7 +10,9 @@ use super::Manager;
 pub(super) struct Aptget;
 
 fn get_program() -> String {
-    if exists_in_path("apt") {
+    if exists_in_path("pkg") {
+        "pkg".to_string()
+    } else if exists_in_path("apt") {
         "sudo apt".to_string()
     } else if exists_in_path("apt-get") {
         "sudo apt-get".to_string()
@@ -30,54 +32,71 @@ impl Manager for Aptget {
     }
 
     fn clean(&self) -> Result<(), Error> {
-        run_and_wait(&format!("{} autoclean", get_program()))?;
-        run_and_wait(&format!("{} autoremove", get_program()))
+        let mut program = get_program();
+        if program.ends_with("pkg") {
+            program = "apt".to_string();
+        }
+        run_and_wait(&format!("{} autoclean", &program))?;
+        run_and_wait(&format!("{} autoremove", &program))
     }
 
-    fn list(&self, pattern: &Option<String>) -> Result<(), Error> {
+    fn list(&self) -> Result<(), Error> {
+        let mut program = get_program();
+        if program.ends_with("pkg") {
+            program = "apt".to_string();
+        }
         run_and_wait(&format!(
-            "{} list {} {}",
-            get_program(),
+            "{} list {}",
+            &program,
             cmd_flag_long("installed"),
-            if pattern.as_deref().is_some() {
-                format!("| grep {}", String::from(pattern.as_deref().unwrap()))
-            } else {
-                String::new()
-            }
         ))
     }
 
     fn old(&self) -> Result<(), Error> {
+        let mut program = get_program();
+        if program.ends_with("pkg") {
+            program = "apt".to_string();
+        }
         repo_update()?;
         run_and_wait(&format!(
             "{} list {}",
-            get_program(),
+            &program,
             cmd_flag_long("upgradeable"),
         ))
     }
 
     fn remove(&self, list: &Vec<String>) -> Result<(), Error> {
-        run_and_wait(&format!("{} purge {}", get_program(), cmd_args(list)))
+        let mut program = get_program();
+        if program.ends_with("pkg") {
+            program = "apt".to_string();
+        }
+        run_and_wait(&format!("{} purge {}", &program, cmd_args(list)))
     }
 
     fn search(&self, pattern: &String) -> Result<(), Error> {
+        let mut program = get_program();
+        if program.ends_with("pkg") {
+            program = "apt".to_string();
+        }
         repo_update()?;
-        run_and_wait(&format!("{} search {}", get_program(), pattern))
+        run_and_wait(&format!("{} search {}", &program, pattern))
     }
 
     fn sync(&self, list: &Vec<String>) -> Result<(), Error> {
-        repo_update()?;
         let program = get_program();
+        repo_update()?;
         run_and_wait(&format!(
             "{} {}",
-            program,
+            &program,
             if list.len() > 0 {
                 format!("install {}", cmd_args(list))
             } else {
                 if program.ends_with("apt") {
                     "full-upgrade".to_string()
-                } else {
+                } else if program.ends_with("apt-get") {
                     "dist-upgrade".to_string()
+                } else {
+                    "upgrade".to_string()
                 }
             }
         ))

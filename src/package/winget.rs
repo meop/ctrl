@@ -26,15 +26,10 @@ impl Manager for Winget {
         Ok(())
     }
 
-    fn list(&self, pattern: &Option<String>) -> Result<(), Error> {
+    fn list(&self) -> Result<(), Error> {
         run_and_wait(&format!(
-            "{} list {}",
+            "{} list",
             get_program(),
-            if pattern.as_deref().is_some() {
-                format!("| sls {}", String::from(pattern.as_deref().unwrap()))
-            } else {
-                String::new()
-            }
         ))
     }
 

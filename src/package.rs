@@ -26,10 +26,7 @@ pub(super) enum Command {
     Clean {},
 
     /// List local installed package(s)
-    List {
-        /// Optional pattern to match
-        pattern: Option<String>,
-    },
+    List {},
 
     /// List out-of-date installed packages
     Old {},
@@ -66,7 +63,7 @@ impl Invoke for Command {
         match self {
             Command::Add { list } => pm.add(list),
             Command::Clean {} => pm.clean(),
-            Command::List { pattern } => pm.list(pattern),
+            Command::List {} => pm.list(),
             Command::Old {} => pm.old(),
             Command::Remove { list } => pm.remove(list),
             Command::Search { pattern } => pm.search(pattern),
@@ -78,7 +75,7 @@ impl Invoke for Command {
 pub(super) trait Manager {
     fn add(&self, list: &Vec<String>) -> Result<(), Error>;
     fn clean(&self) -> Result<(), Error>;
-    fn list(&self, pattern: &Option<String>) -> Result<(), Error>;
+    fn list(&self) -> Result<(), Error>;
     fn old(&self) -> Result<(), Error>;
     fn remove(&self, list: &Vec<String>) -> Result<(), Error>;
     fn search(&self, pattern: &String) -> Result<(), Error>;
