@@ -17,6 +17,10 @@ fn get_program() -> String {
     }
 }
 
+fn repo_update() -> Result<(), Error> {
+    run_and_wait(&format!("{} update", get_program(),))
+}
+
 fn fix_fs_perm() -> Result<(), Error> {
     run_and_wait(
         &"sudo -S chown -R $(whoami) /usr/local/bin /usr/local/lib /usr/local/sbin".to_string(),
@@ -27,11 +31,8 @@ fn fix_fs_perm() -> Result<(), Error> {
 impl Manager for Homebrew {
     fn add(&self, list: &Vec<String>) -> Result<(), Error> {
         fix_fs_perm()?;
-        run_and_wait(&format!(
-            "{} install {}",
-            get_program(),
-            cmd_args(list),
-        ))
+        repo_update()?;
+        run_and_wait(&format!("{} install {}", get_program(), cmd_args(list),))
     }
 
     fn clean(&self) -> Result<(), Error> {
@@ -39,31 +40,27 @@ impl Manager for Homebrew {
     }
 
     fn list(&self) -> Result<(), Error> {
-        run_and_wait(&format!(
-            "{} list",
-            get_program(),
-        ))
+        run_and_wait(&format!("{} list", get_program(),))
     }
 
     fn old(&self) -> Result<(), Error> {
+        repo_update()?;
         run_and_wait(&format!("{} outdated", get_program()))
     }
 
     fn remove(&self, list: &Vec<String>) -> Result<(), Error> {
         fix_fs_perm()?;
-        run_and_wait(&format!(
-            "{} uninstall {}",
-            get_program(),
-            cmd_args(list),
-        ))
+        run_and_wait(&format!("{} uninstall {}", get_program(), cmd_args(list),))
     }
-    
+
     fn search(&self, pattern: &String) -> Result<(), Error> {
+        repo_update()?;
         run_and_wait(&format!("{} search {}", get_program(), pattern))
     }
-    
+
     fn sync(&self, list: &Vec<String>) -> Result<(), Error> {
         fix_fs_perm()?;
+        repo_update()?;
         run_and_wait(&format!(
             "{} upgrade {} {}",
             get_program(),

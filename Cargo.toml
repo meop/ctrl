@@ -1,12 +1,12 @@
 [package]
 name = "ctrl"
-version = "0.3.11"
+version = "0.3.12"
 edition = "2021"
 description = "CLI tool for cross platform OS management"
 categories = ["command-line-interface"]
 
 [dependencies]
-clap = { version = "^3", features = ["derive"] }
+clap = { version = "^4", features = ["derive"] }
 # config = { version = "^0" }
 console = { version = "^0" }
 dialoguer = { version = "^0" }
