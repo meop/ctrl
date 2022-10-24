@@ -1,6 +1,5 @@
 use std::error::Error;
 
-use clap::AppSettings;
 use clap::Parser;
 use clap::Subcommand;
 
@@ -14,9 +13,9 @@ mod release;
 use release::Invoke as ReleaseInvoke;
 
 #[derive(Parser)]
-#[clap(about, version)]
-#[clap(global_setting(AppSettings::DeriveDisplayOrder))]
-#[clap(global_setting(AppSettings::DisableHelpSubcommand))]
+#[clap(about)]
+#[clap(disable_help_subcommand = true)]
+#[clap(version)]
 struct Cli {
     #[clap(subcommand)]
     command: Command,

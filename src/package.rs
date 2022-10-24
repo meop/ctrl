@@ -18,7 +18,8 @@ pub(super) enum Command {
     /// Add new package(s)
     Add {
         /// List of packages [required]
-        #[clap(multiple_values = true, required = true)]
+        #[clap(num_args = 1..)]
+        #[clap(required = true)]
         list: Vec<String>,
     },
 
@@ -34,7 +35,8 @@ pub(super) enum Command {
     /// Remove local installed package(s)
     Remove {
         /// List of packages [required]
-        #[clap(multiple_values = true, required = true)]
+        #[clap(num_args = 1..)]
+        #[clap(required = true)]
         list: Vec<String>,
     },
 
@@ -47,7 +49,7 @@ pub(super) enum Command {
     /// Sync to latest installed package(s)
     Sync {
         /// List of packages [optional]
-        #[clap(multiple_values = true)]
+        #[clap(num_args = 1..)]
         list: Vec<String>,
     },
 }
