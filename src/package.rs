@@ -5,13 +5,20 @@ use os_info::Type;
 
 mod aptget;
 use aptget::Aptget;
-mod homebrew;
-use homebrew::Homebrew;
+mod dnf;
+use dnf::Dnf;
 mod pacman;
 use pacman::Pacman;
 
+mod homebrew;
+use homebrew::Homebrew;
+
 mod winget;
 use winget::Winget;
+mod scoop;
+use scoop::Scoop;
+
+use crate::file::exists_in_path;
 
 #[derive(Subcommand)]
 pub(super) enum Command {
@@ -30,7 +37,7 @@ pub(super) enum Command {
     List {},
 
     /// List out-of-date installed packages
-    Old {},
+    Outdated {},
 
     /// Remove local installed package(s)
     Remove {
@@ -60,17 +67,26 @@ pub(super) trait Invoke {
 
 impl Invoke for Command {
     fn run(&self) -> Result<(), Error> {
-        let pm = get_manager();
+        let managers = get_managers();
+        let mut result: Result<(), Error> = Ok(());
 
-        match self {
-            Command::Add { list } => pm.add(list),
-            Command::Clean {} => pm.clean(),
-            Command::List {} => pm.list(),
-            Command::Old {} => pm.old(),
-            Command::Remove { list } => pm.remove(list),
-            Command::Search { pattern } => pm.search(pattern),
-            Command::Sync { list } => pm.sync(list),
+        for manager in managers.iter() {
+            result = match self {
+                Command::Add { list } => manager.add(list),
+                Command::Clean {} => manager.clean(),
+                Command::List {} => manager.list(),
+                Command::Outdated {} => manager.outdated(),
+                Command::Remove { list } => manager.remove(list),
+                Command::Search { pattern } => manager.search(pattern),
+                Command::Sync { list } => manager.sync(list),
+            };
+
+            if let Err(_) = result {
+                break;
+            }
         }
+
+        return result;
     }
 }
 
@@ -78,23 +94,73 @@ pub(super) trait Manager {
     fn add(&self, list: &Vec<String>) -> Result<(), Error>;
     fn clean(&self) -> Result<(), Error>;
     fn list(&self) -> Result<(), Error>;
-    fn old(&self) -> Result<(), Error>;
+    fn outdated(&self) -> Result<(), Error>;
     fn remove(&self, list: &Vec<String>) -> Result<(), Error>;
     fn search(&self, pattern: &String) -> Result<(), Error>;
     fn sync(&self, list: &Vec<String>) -> Result<(), Error>;
 }
 
-fn get_manager() -> Box<dyn Manager> {
+fn get_managers() -> Vec<Box<dyn Manager>> {
     let os_type = os_info::get().os_type();
+    let mut managers: Vec<Box<dyn Manager>> = Vec::new();
+
     match os_type {
-        Type::Arch | Type::Manjaro => Box::new(Pacman),
-        Type::Android | Type::Debian | Type::Mint | Type::Raspbian | Type::Ubuntu => {
-            Box::new(Aptget)
+        Type::Arch | Type::Manjaro => {
+            let program = if exists_in_path("paru") {
+                "paru".to_string()
+            } else if exists_in_path("yay") {
+                "yay".to_string()
+            } else if exists_in_path("pacman") {
+                "sudo pacman".to_string()
+            } else {
+                panic!("no system package manager found in path")
+            };
+            managers.push(Box::new(Pacman { program }));
         }
-        Type::Macos => Box::new(Homebrew),
-        Type::Windows => Box::new(Winget),
+        // Android == Termux
+        Type::Android | Type::Debian | Type::Mint | Type::Raspbian | Type::Ubuntu => {
+            let program = if exists_in_path("pkg") {
+                "pkg".to_string()
+            } else if exists_in_path("apt") {
+                "sudo apt".to_string()
+            } else if exists_in_path("apt-get") {
+                "sudo apt-get".to_string()
+            } else {
+                panic!("no system package manager found in path")
+            };
+            managers.push(Box::new(Aptget { program }));
+        }
+        Type::Fedora => {
+            let program = if exists_in_path("dnf") {
+                "sudo dnf".to_string()
+            } else {
+                panic!("no system package manager found in path")
+            };
+            managers.push(Box::new(Dnf { program }));
+        }
+        Type::Macos => {
+            if exists_in_path("brew") {
+                managers.push(Box::new(Homebrew {
+                    program: "brew".to_string(),
+                }));
+            }
+        }
+        Type::Windows => {
+            if exists_in_path("winget") {
+                managers.push(Box::new(Winget {
+                    program: "winget".to_string(),
+                }));
+            }
+            if exists_in_path("scoop") {
+                managers.push(Box::new(Scoop {
+                    program: "scoop".to_string(),
+                }));
+            }
+        }
         _ => panic!("not yet supported: {os_type}"),
     }
+
+    return managers;
 }
 
 fn cmd_args(list: &Vec<String>) -> String {

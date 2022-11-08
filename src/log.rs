@@ -17,7 +17,8 @@ fn style_input(input: &str, category: Category) -> String {
         Category::Warn => style(input).yellow(),
         Category::Ok => style(input).green(),
         Category::Err => style(input).red(),
-    }.to_string()
+    }
+    .to_string()
 }
 
 pub(crate) fn log(input: &str) {

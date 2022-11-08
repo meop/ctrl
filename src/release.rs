@@ -92,7 +92,7 @@ fn sync() -> Result<(), Box<dyn Error>> {
 
     if version_compare::compare_to(running_version, latest_version, Cmp::Ge).unwrap() {
         logcln(
-            "running version is already at or above latest version",
+            "already at or above latest version",
             Category::Info,
         );
         return Ok(());
