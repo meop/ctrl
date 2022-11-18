@@ -21,7 +21,7 @@ impl Manager for Dnf {
     }
 
     fn clean(&self) -> Result<(), Error> {
-        run_and_wait(&format!("{} clean", &self.program))?;
+        run_and_wait(&format!("{} clean dbcache", &self.program))?;
         run_and_wait(&format!("{} autoremove", &self.program))
     }
 
