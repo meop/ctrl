@@ -1,0 +1,43 @@
+TODO
+    allow flag to specify the package manager for issuing the package command (like initial add)
+    have homebrew first check if cask exists, and if not, reissue command without cask, automatically
+    run installer scripts for non-system package managers, as below
+    list available package managers
+
+Installers for:
+
+Macos:
+
+homebrew
+
+Windows:
+
+winget (?? built into 11 now)
+choco
+scoop
+
+Linux:
+
+paru (arch)
+yay (arch)
+homebrew
+
+snap (most popular, bit slower, uses Ubuntu core runtime and also X11 GUI apps may not always work in headless VNC setups.. like Joplin)
+flatpak (less popular, more portable and faster than snap)
+appimage (least popular, most portable, fastest)
+
+---
+
+Containers:
+
+Docker
+
+Runtimes:
+
+Rust (cargo)
+    rustup updater
+    cargo updater
+Node (npm)
+    (npx, Unix)
+Python (pip)
+    (pipx, Unix)

@@ -20,6 +20,13 @@ use scoop::Scoop;
 
 use crate::file::exists_in_path;
 
+pub enum ThirdPartyManager {
+    #[cfg(unix)]
+    Homebrew,
+    #[cfg(windows)]
+    Scoop
+}
+
 #[derive(Subcommand)]
 pub(super) enum Command {
     /// Add new package(s)
@@ -100,6 +107,10 @@ pub(super) trait Manager {
     fn sync(&self, list: &Vec<String>) -> Result<(), Error>;
 }
 
+fn check_for_brew(mut Vec<Box<dyn Manager) {
+
+}
+
 fn get_managers() -> Vec<Box<dyn Manager>> {
     let os_type = os_info::get().os_type();
     let mut managers: Vec<Box<dyn Manager>> = Vec::new();
@@ -116,6 +127,11 @@ fn get_managers() -> Vec<Box<dyn Manager>> {
                 panic!("no system package manager found in path")
             };
             managers.push(Box::new(Pacman { program }));
+            if exists_in_path("brew") {
+                managers.push(Box::new(Homebrew {
+                    program: "brew".to_string(),
+                }));
+            }
         }
         // Android == Termux
         Type::Android | Type::Debian | Type::Mint | Type::Raspbian | Type::Ubuntu => {
@@ -129,14 +145,24 @@ fn get_managers() -> Vec<Box<dyn Manager>> {
                 panic!("no system package manager found in path")
             };
             managers.push(Box::new(Aptget { program }));
+            if exists_in_path("brew") {
+                managers.push(Box::new(Homebrew {
+                    program: "brew".to_string(),
+                }));
+            }
         }
-        Type::Fedora => {
+        Type::CentOS | Type::Fedora => {
             let program = if exists_in_path("dnf") {
                 "sudo dnf".to_string()
             } else {
                 panic!("no system package manager found in path")
             };
             managers.push(Box::new(Dnf { program }));
+            if exists_in_path("brew") {
+                managers.push(Box::new(Homebrew {
+                    program: "brew".to_string(),
+                }));
+            }
         }
         Type::Macos => {
             if exists_in_path("brew") {

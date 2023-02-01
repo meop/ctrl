@@ -1,0 +1,2 @@
+remote = "git@github.com:meop/dotfiles.git"
+local = "~/.dotfiles"
