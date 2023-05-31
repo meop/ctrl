@@ -71,24 +71,20 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@v3
 
-      - name: Patch Android NDK linker [Android (aarch64)]
-        run: bash scripts/patch_android_ndk_libgcc.sh
-        if: ${{ matrix.target == 'aarch64-linux-android' }}
-
       - name: Set Android NDK linker path [Android (aarch64)]
         run: echo "$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_PATH
         if: ${{ matrix.target == 'aarch64-linux-android' }}
 
       - name: Install GNU GCC linker [Linux (aarch64)]
-        run: sudo apt-get install -y gcc-aarch64-linux-gnu
+        run: sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu
         if: ${{ matrix.target == 'aarch64-unknown-linux-gnu' }}
 
       - name: Rust target add
         run: rustup target add ${{ matrix.target }}
 
       - name: Cargo build release
-        # specifying --target is required for Rust linking
-        # when cross compiling, building stdlib from source, etc
+        # specifying --target is required for Rust linker
+        # when cross compiling, static linking, building stdlib from source, etc
         # https://github.com/rust-lang/rust/issues/78210
         run: cargo build --release --target=${{ matrix.target }}
 
