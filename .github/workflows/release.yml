@@ -80,7 +80,7 @@ jobs:
         if: ${{ matrix.target == 'aarch64-linux-android' }}
 
       - name: Install GNU GCC linker [Linux (aarch64)]
-        run: apt-get update && apt-get install -y gcc-aarch64-linux-gnu
+        run: sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu
         if: ${{ matrix.target == 'aarch64-unknown-linux-gnu' }}
 
       - name: Rust target add

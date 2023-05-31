@@ -11,6 +11,6 @@ then
     
     for l in "${bins[@]}"
     do
-        ln -sf ${d}/llvm-${l} ${d}/aarch64-linux-android-${l}
+        sudo ln -sf ${d}/llvm-${l} ${d}/aarch64-linux-android-${l}
     done
 fi
