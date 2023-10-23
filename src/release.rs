@@ -108,7 +108,7 @@ fn sync() -> Result<(), Box<dyn Error>> {
 
     let binary = format!("{}-ctrl", self_update::get_target());
 
-    if let Some(asset) = releases[0].asset_for(&binary, None) {
+    if let Some(asset) = releases[0].asset_for(&binary) {
         let cur_path_str = get_cur_path_str()?;
 
         let bak_path_str = get_bak_path_str(&cur_path_str);
