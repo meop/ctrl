@@ -14,16 +14,8 @@ fn repo_update(program: &String) -> Result<(), Error> {
     run_and_wait(&format!("{} update", program))
 }
 
-fn fix_fs_perm() -> Result<(), Error> {
-    run_and_wait(
-        &"sudo -S chown -R $(whoami) /usr/local/bin /usr/local/lib /usr/local/sbin".to_string(),
-    )?;
-    run_and_wait(&"chmod u+w /usr/local/bin /usr/local/lib /usr/local/sbin".to_string())
-}
-
 impl Manager for Homebrew {
     fn add(&self, list: &Vec<String>) -> Result<(), Error> {
-        fix_fs_perm()?;
         repo_update(&self.program)?;
         run_and_wait(&format!("{} install {}", &self.program, cmd_args(list),))
     }
@@ -42,7 +34,6 @@ impl Manager for Homebrew {
     }
 
     fn remove(&self, list: &Vec<String>) -> Result<(), Error> {
-        fix_fs_perm()?;
         run_and_wait(&format!("{} uninstall {}", &self.program, cmd_args(list)))
     }
 
@@ -52,7 +43,6 @@ impl Manager for Homebrew {
     }
 
     fn sync(&self, list: &Vec<String>) -> Result<(), Error> {
-        fix_fs_perm()?;
         repo_update(&self.program)?;
         run_and_wait(&format!(
             "{} upgrade {} {}",

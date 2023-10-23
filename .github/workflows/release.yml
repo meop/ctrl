@@ -6,7 +6,7 @@ on:
 
 jobs:
   create_release:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Git checkout
@@ -41,30 +41,30 @@ jobs:
 
         include:
           - target: aarch64-apple-ios
-            os: macos-12
+            os: macos-latest
             binary: ctrl
           - target: aarch64-linux-android
-            os: ubuntu-20.04
+            os: ubuntu-latest
             binary: ctrl
 
           - target: aarch64-apple-darwin
-            os: macos-12
+            os: macos-latest
             binary: ctrl
           - target: aarch64-unknown-linux-gnu
-            os: ubuntu-20.04
+            os: ubuntu-latest
             binary: ctrl
           - target: aarch64-pc-windows-msvc
-            os: windows-2019
+            os: windows-latest
             binary: ctrl.exe
 
           - target: x86_64-apple-darwin
-            os: macos-12
+            os: macos-latest
             binary: ctrl
           - target: x86_64-unknown-linux-gnu
-            os: ubuntu-20.04
+            os: ubuntu-latest
             binary: ctrl
           - target: x86_64-pc-windows-msvc
-            os: windows-2019
+            os: windows-latest
             binary: ctrl.exe
 
     steps:
