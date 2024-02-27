@@ -21,7 +21,7 @@ impl Manager for Homebrew {
     }
 
     fn clean(&self) -> Result<(), Error> {
-        run_and_wait(&format!("{} cleanup", &self.program))
+        run_and_wait(&format!("{} cleanup --prune=all", &self.program))
     }
 
     fn list(&self) -> Result<(), Error> {

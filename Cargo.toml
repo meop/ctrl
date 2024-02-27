@@ -1,6 +1,6 @@
 [package]
 name = "ctrl"
-version = "0.3.15"
+version = "0.3.16"
 edition = "2021"
 description = "CLI tool for cross platform OS management"
 categories = ["command-line-interface"]
@@ -20,7 +20,7 @@ self_update = { version = "^0" }
 # serde = { version = "^1", features = ["derive"] }
 # simple_logger = { version = "^2" }
 version-compare = { version = "^0" }
-which = { version = "^5" }
+which = { version = "^6" }
 
 [profile.release]
 codegen-units = 1
