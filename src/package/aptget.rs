@@ -37,7 +37,7 @@ impl Manager for Aptget {
         run_and_wait(&format!("{} list {}", &program, cmd_flag_long("installed"),))
     }
 
-    fn outdated(&self) -> Result<(), Error> {
+    fn probe(&self) -> Result<(), Error> {
         let mut program = self.program.clone();
         if program.ends_with("pkg") {
             program = "apt".to_string();
@@ -67,7 +67,7 @@ impl Manager for Aptget {
         run_and_wait(&format!("{} search {}", &program, pattern))
     }
 
-    fn sync(&self, list: &Vec<String>) -> Result<(), Error> {
+    fn upgrade(&self, list: &Vec<String>) -> Result<(), Error> {
         repo_update(&self.program)?;
         run_and_wait(&format!(
             "{} {}",

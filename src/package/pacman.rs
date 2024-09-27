@@ -43,7 +43,7 @@ impl Manager for Pacman {
         run_and_wait(&format!("{} {}", &self.program, cmd_flag_long("query"),))
     }
 
-    fn outdated(&self) -> Result<(), Error> {
+    fn probe(&self) -> Result<(), Error> {
         repo_update(&self.program)?;
         run_and_wait(&format!(
             "{} {} {}",
@@ -75,7 +75,7 @@ impl Manager for Pacman {
         ))
     }
 
-    fn sync(&self, list: &Vec<String>) -> Result<(), Error> {
+    fn upgrade(&self, list: &Vec<String>) -> Result<(), Error> {
         repo_update(&self.program)?;
         run_and_wait(&format!(
             "{} {} {}",

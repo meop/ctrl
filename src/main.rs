@@ -9,8 +9,8 @@ mod log;
 
 mod package;
 use package::Invoke as PackageInvoke;
-mod release;
-use release::Invoke as ReleaseInvoke;
+mod me;
+use me::Invoke as MeInvoke;
 
 #[derive(Parser)]
 #[clap(about)]
@@ -24,15 +24,19 @@ struct Cli {
 #[derive(Subcommand)]
 enum Command {
     /// FS backup commands
+    #[clap(visible_alias("b"))]
     Backup,
 
     /// OS package commands
     #[clap(subcommand)]
+    #[clap(visible_alias("p"))]
     Package(package::Command),
 
-    /// Self release commands
+    /// Self commands
     #[clap(subcommand)]
-    Release(release::Command),
+    #[clap(name = "self")]
+    #[clap(visible_alias("s"))]
+    Me(me::Command),
 }
 
 impl Command {
@@ -40,7 +44,7 @@ impl Command {
         match self {
             Command::Backup => Ok(()),
             Command::Package(c) => c.run().map(|_| ()).map_err(|e| e.into()),
-            Command::Release(c) => c.run(),
+            Command::Me(c) => c.run(),
         }
     }
 }

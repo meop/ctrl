@@ -19,11 +19,12 @@ impl Manager for Winget {
         Ok(())
     }
 
+
     fn list(&self) -> Result<(), Error> {
         run_and_wait(&format!("{} list", &self.program,))
     }
 
-    fn outdated(&self) -> Result<(), Error> {
+    fn probe(&self) -> Result<(), Error> {
         run_and_wait(&format!("{} upgrade", &self.program))
     }
 
@@ -35,7 +36,7 @@ impl Manager for Winget {
         run_and_wait(&format!("{} search {}", &self.program, pattern))
     }
 
-    fn sync(&self, list: &Vec<String>) -> Result<(), Error> {
+    fn upgrade(&self, list: &Vec<String>) -> Result<(), Error> {
         run_and_wait(&format!(
             "{} upgrade {}",
             &self.program,

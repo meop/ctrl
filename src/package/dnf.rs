@@ -33,7 +33,7 @@ impl Manager for Dnf {
         ))
     }
 
-    fn outdated(&self) -> Result<(), Error> {
+    fn probe(&self) -> Result<(), Error> {
         repo_update(&self.program)?;
         run_and_wait(&format!(
             "{} list {}",
@@ -51,7 +51,7 @@ impl Manager for Dnf {
         run_and_wait(&format!("{} search {}", &self.program, pattern))
     }
 
-    fn sync(&self, list: &Vec<String>) -> Result<(), Error> {
+    fn upgrade(&self, list: &Vec<String>) -> Result<(), Error> {
         repo_update(&self.program)?;
         run_and_wait(&format!(
             "{} {}",

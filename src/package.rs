@@ -22,41 +22,73 @@ use crate::file::exists_in_path;
 
 #[derive(Subcommand)]
 pub(super) enum Command {
-    /// Add new package(s)
+    /// Add package(s)
+    #[clap(alias("install"))]
+    #[clap(alias("in"))]
+    #[clap(visible_alias("a"))]
     Add {
-        /// List of packages [required]
+        /// Package(s)
         #[clap(num_args = 1..)]
         #[clap(required = true)]
+        #[arg(value_name = "PACKAGES")]
         list: Vec<String>,
     },
 
     /// Clean local cache
+    #[clap(alias("cl"))]
+    #[clap(visible_alias("c"))]
     Clean {},
 
-    /// List local installed package(s)
+    /// List present package(s)
+    #[clap(alias("query"))]
+    #[clap(alias("ls"))]
+    #[clap(visible_alias("l"))]
     List {},
 
-    /// List out-of-date installed packages
-    Outdated {},
+    /// Probe for outdated package(s)
+    #[clap(alias("outdated"))]
+    #[clap(alias("out"))]
+    #[clap(alias("obsolete"))]
+    #[clap(alias("ob"))]
+    #[clap(visible_alias("p"))]
+    Probe {},
 
-    /// Remove local installed package(s)
+    /// Remove package(s)
+    #[clap(alias("uninstall"))]
+    #[clap(alias("unin"))]
+    #[clap(alias("un"))]
+    #[clap(alias("delete"))]
+    #[clap(alias("del"))]
+    #[clap(alias("rem"))]
+    #[clap(alias("rm"))]
+    #[clap(visible_alias("r"))]
     Remove {
-        /// List of packages [required]
+        /// Package(s)
         #[clap(num_args = 1..)]
         #[clap(required = true)]
+        #[arg(value_name = "PACKAGES")]
         list: Vec<String>,
     },
 
     /// Search for remote package(s)
+    #[clap(alias("find"))]
+    #[clap(alias("fi"))]
+    #[clap(alias("sr"))]
+    #[clap(visible_alias("s"))]
     Search {
-        /// Optional pattern to match
+        /// Pattern to match
+        #[arg(value_name = "PATTERN")]
         pattern: String,
     },
 
-    /// Sync to latest installed package(s)
-    Sync {
-        /// List of packages [optional]
+    /// Upgrade package(s)
+    #[clap(alias("update"))]
+    #[clap(alias("up"))]
+    #[clap(visible_alias("u"))]
+    Upgrade {
+        /// Package(s) [optional]
         #[clap(num_args = 1..)]
+        #[arg(value_name = "PACKAGES")]
         list: Vec<String>,
     },
 }
@@ -75,10 +107,10 @@ impl Invoke for Command {
                 Command::Add { list } => manager.add(list),
                 Command::Clean {} => manager.clean(),
                 Command::List {} => manager.list(),
-                Command::Outdated {} => manager.outdated(),
+                Command::Probe {} => manager.probe(),
                 Command::Remove { list } => manager.remove(list),
                 Command::Search { pattern } => manager.search(pattern),
-                Command::Sync { list } => manager.sync(list),
+                Command::Upgrade { list } => manager.upgrade(list),
             };
 
             if let Err(_) = result {
@@ -94,10 +126,10 @@ pub(super) trait Manager {
     fn add(&self, list: &Vec<String>) -> Result<(), Error>;
     fn clean(&self) -> Result<(), Error>;
     fn list(&self) -> Result<(), Error>;
-    fn outdated(&self) -> Result<(), Error>;
+    fn probe(&self) -> Result<(), Error>;
     fn remove(&self, list: &Vec<String>) -> Result<(), Error>;
     fn search(&self, pattern: &String) -> Result<(), Error>;
-    fn sync(&self, list: &Vec<String>) -> Result<(), Error>;
+    fn upgrade(&self, list: &Vec<String>) -> Result<(), Error>;
 }
 
 fn get_managers() -> Vec<Box<dyn Manager>> {

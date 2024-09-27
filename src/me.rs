@@ -15,10 +15,14 @@ use crate::log::Category;
 #[derive(Subcommand)]
 pub(super) enum Command {
     /// Revert to local backup release
+    #[clap(visible_alias("r"))]
     Revert {},
 
-    /// Sync to latest release
-    Sync {},
+    /// Upgrade to latest release
+    #[clap(alias("update"))]
+    #[clap(alias("up"))]
+    #[clap(visible_alias("u"))]
+    Upgrade {},
 }
 
 pub(super) trait Invoke {
@@ -29,7 +33,7 @@ impl Invoke for Command {
     fn run(&self) -> Result<(), Box<dyn Error>> {
         match self {
             Command::Revert {} => revert(),
-            Command::Sync {} => sync(),
+            Command::Upgrade {} => upgrade(),
         }
     }
 }
@@ -69,7 +73,7 @@ fn revert() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn sync() -> Result<(), Box<dyn Error>> {
+fn upgrade() -> Result<(), Box<dyn Error>> {
     let releases = self_update::backends::github::ReleaseList::configure()
         .repo_owner("meop")
         .repo_name("ctrl")
@@ -108,7 +112,7 @@ fn sync() -> Result<(), Box<dyn Error>> {
 
     let binary = format!("{}-ctrl", self_update::get_target());
 
-    if let Some(asset) = releases[0].asset_for(&binary) {
+    if let Some(asset) = releases[0].asset_for(&binary, None) {
         let cur_path_str = get_cur_path_str()?;
 
         let bak_path_str = get_bak_path_str(&cur_path_str);
