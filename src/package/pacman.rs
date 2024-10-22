@@ -1,6 +1,7 @@
 use std::io::Error;
 
-use crate::command::run_and_wait;
+use crate::command::run_cmd;
+use crate::command::run_cmd_filtered;
 
 use super::cmd_args;
 use super::cmd_flag_long;
@@ -11,7 +12,7 @@ pub(super) struct Pacman {
 }
 
 fn repo_update(program: &String) -> Result<(), Error> {
-    run_and_wait(&format!(
+    run_cmd(&format!(
         "{} {} {}",
         program,
         cmd_flag_long("sync"),
@@ -22,7 +23,7 @@ fn repo_update(program: &String) -> Result<(), Error> {
 impl Manager for Pacman {
     fn add(&self, list: &Vec<String>) -> Result<(), Error> {
         repo_update(&self.program)?;
-        run_and_wait(&format!(
+        run_cmd(&format!(
             "{} {} {}",
             &self.program,
             cmd_flag_long("sync"),
@@ -31,7 +32,7 @@ impl Manager for Pacman {
     }
 
     fn clean(&self) -> Result<(), Error> {
-        run_and_wait(&format!(
+        run_cmd(&format!(
             "{} {} {}",
             &self.program,
             cmd_flag_long("sync"),
@@ -39,13 +40,16 @@ impl Manager for Pacman {
         ))
     }
 
-    fn list(&self) -> Result<(), Error> {
-        run_and_wait(&format!("{} {}", &self.program, cmd_flag_long("query"),))
+    fn list(&self, list: &Vec<String>) -> Result<(), Error> {
+        run_cmd_filtered(
+            &format!("{} {}", &self.program, cmd_flag_long("query"),),
+            list,
+        )
     }
 
     fn probe(&self) -> Result<(), Error> {
         repo_update(&self.program)?;
-        run_and_wait(&format!(
+        run_cmd(&format!(
             "{} {} {}",
             &self.program,
             cmd_flag_long("query"),
@@ -54,7 +58,7 @@ impl Manager for Pacman {
     }
 
     fn remove(&self, list: &Vec<String>) -> Result<(), Error> {
-        run_and_wait(&format!(
+        run_cmd(&format!(
             "{} {} {} {} {}",
             &self.program,
             cmd_flag_long("remove"),
@@ -66,7 +70,7 @@ impl Manager for Pacman {
 
     fn search(&self, pattern: &String) -> Result<(), Error> {
         repo_update(&self.program)?;
-        run_and_wait(&format!(
+        run_cmd(&format!(
             "{} {} {} {}",
             &self.program,
             cmd_flag_long("query"),
@@ -77,7 +81,7 @@ impl Manager for Pacman {
 
     fn upgrade(&self, list: &Vec<String>) -> Result<(), Error> {
         repo_update(&self.program)?;
-        run_and_wait(&format!(
+        run_cmd(&format!(
             "{} {} {}",
             &self.program,
             cmd_flag_long("sync"),

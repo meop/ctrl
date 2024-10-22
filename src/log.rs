@@ -14,8 +14,8 @@ fn style_input(input: &str, category: Category) -> String {
         Category::Cmd => style(input).cyan(),
         Category::Arg => style(input).magenta(),
         Category::Info => style(input).blue(),
-        Category::Warn => style(input).yellow(),
         Category::Ok => style(input).green(),
+        Category::Warn => style(input).yellow(),
         Category::Err => style(input).red(),
     }
     .to_string()

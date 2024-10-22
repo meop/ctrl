@@ -43,7 +43,11 @@ pub(super) enum Command {
     #[clap(alias("query"))]
     #[clap(alias("ls"))]
     #[clap(visible_alias("l"))]
-    List {},
+    List {
+        #[clap(num_args = 1..)]
+        #[arg(value_name = "PACKAGES")]
+        list: Vec<String>,
+    },
 
     /// Probe for outdated package(s)
     #[clap(alias("outdated"))]
@@ -106,7 +110,7 @@ impl Invoke for Command {
             result = match self {
                 Command::Add { list } => manager.add(list),
                 Command::Clean {} => manager.clean(),
-                Command::List {} => manager.list(),
+                Command::List { list } => manager.list(list),
                 Command::Probe {} => manager.probe(),
                 Command::Remove { list } => manager.remove(list),
                 Command::Search { pattern } => manager.search(pattern),
@@ -125,7 +129,7 @@ impl Invoke for Command {
 pub(super) trait Manager {
     fn add(&self, list: &Vec<String>) -> Result<(), Error>;
     fn clean(&self) -> Result<(), Error>;
-    fn list(&self) -> Result<(), Error>;
+    fn list(&self, list: &Vec<String>) -> Result<(), Error>;
     fn probe(&self) -> Result<(), Error>;
     fn remove(&self, list: &Vec<String>) -> Result<(), Error>;
     fn search(&self, pattern: &String) -> Result<(), Error>;

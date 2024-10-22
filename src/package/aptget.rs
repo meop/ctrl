@@ -1,6 +1,7 @@
 use std::io::Error;
 
-use crate::command::run_and_wait;
+use crate::command::run_cmd;
+use crate::command::run_cmd_filtered;
 
 use super::cmd_args;
 use super::cmd_flag_long;
@@ -11,65 +12,48 @@ pub(super) struct Aptget {
 }
 
 fn repo_update(program: &String) -> Result<(), Error> {
-    run_and_wait(&format!("{} update", program))
+    run_cmd(&format!("{} update", program))
 }
 
 impl Manager for Aptget {
     fn add(&self, list: &Vec<String>) -> Result<(), Error> {
         repo_update(&self.program)?;
-        run_and_wait(&format!("{} install {}", &self.program, cmd_args(list)))
+        run_cmd(&format!("{} install {}", &self.program, cmd_args(list)))
     }
 
     fn clean(&self) -> Result<(), Error> {
-        let mut program = self.program.clone();
-        if program.ends_with("pkg") {
-            program = "apt".to_string();
-        }
-        run_and_wait(&format!("{} autoclean", &program))?;
-        run_and_wait(&format!("{} autoremove", &program))
+        run_cmd(&format!("{} autoclean", &self.program))
     }
 
-    fn list(&self) -> Result<(), Error> {
-        let mut program = self.program.clone();
-        if program.ends_with("pkg") {
-            program = "apt".to_string();
-        }
-        run_and_wait(&format!("{} list {}", &program, cmd_flag_long("installed"),))
+    fn list(&self, list: &Vec<String>) -> Result<(), Error> {
+        run_cmd_filtered(
+            &format!("{} list {}", &self.program, cmd_flag_long("installed"),),
+            list,
+        )
     }
 
     fn probe(&self) -> Result<(), Error> {
-        let mut program = self.program.clone();
-        if program.ends_with("pkg") {
-            program = "apt".to_string();
-        }
-        repo_update(&program)?;
-        run_and_wait(&format!(
+        repo_update(&self.program)?;
+        run_cmd(&format!(
             "{} list {}",
-            &program,
+            &self.program,
             cmd_flag_long("upgradeable"),
         ))
     }
 
     fn remove(&self, list: &Vec<String>) -> Result<(), Error> {
-        let mut program = self.program.clone();
-        if program.ends_with("pkg") {
-            program = "apt".to_string();
-        }
-        run_and_wait(&format!("{} purge {}", &program, cmd_args(list)))
+        run_cmd(&format!("{} purge {}", &self.program, cmd_args(list)))?;
+        run_cmd(&format!("{} autoremove", &self.program))
     }
 
     fn search(&self, pattern: &String) -> Result<(), Error> {
-        let mut program = self.program.clone();
-        if program.ends_with("pkg") {
-            program = "apt".to_string();
-        }
-        repo_update(&program)?;
-        run_and_wait(&format!("{} search {}", &program, pattern))
+        repo_update(&self.program)?;
+        run_cmd(&format!("{} search {}", &self.program, pattern))
     }
 
     fn upgrade(&self, list: &Vec<String>) -> Result<(), Error> {
         repo_update(&self.program)?;
-        run_and_wait(&format!(
+        run_cmd(&format!(
             "{} {}",
             self.program,
             if list.len() > 0 {
