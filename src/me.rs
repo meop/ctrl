@@ -81,29 +81,29 @@ fn upgrade() -> Result<(), Box<dyn Error>> {
         .fetch()?;
 
     if releases.len() == 0 {
-        logcln("no releases found", Category::Info);
+        logcln("releases empty", Category::Info);
         return Ok(());
     }
 
-    let running_version = self_update::cargo_crate_version!();
+    let current_version = self_update::cargo_crate_version!();
     let latest_version = &releases[0].version;
 
     logcln(
-        &format!("running version: {running_version}"),
+        &format!("current: {current_version}"),
         Category::Info,
     );
-    logcln(&format!("latest version: {latest_version}"), Category::Info);
+    logcln(&format!("latest: {latest_version}"), Category::Info);
 
-    if version_compare::compare_to(running_version, latest_version, Cmp::Ge).unwrap() {
+    if version_compare::compare_to(current_version, latest_version, Cmp::Ge).unwrap() {
         logcln(
-            "already at or above latest version",
+            "already at latest",
             Category::Info,
         );
         return Ok(());
     }
 
     if !Confirm::new()
-        .with_prompt("upgrade to latest version?")
+        .with_prompt("upgrade to latest?")
         .default(true)
         .interact()?
     {
@@ -134,7 +134,7 @@ fn upgrade() -> Result<(), Box<dyn Error>> {
             .to_dest(Path::new(&cur_path_str))?;
     } else {
         logcln(
-            &format!("latest version does not contain target: {binary}"),
+            &format!("release missing: {binary}"),
             Category::Info,
         );
         return Ok(());

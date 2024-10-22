@@ -40,20 +40,20 @@ pub(crate) fn run_cmd(command: &String) -> Result<(), Error> {
 
 pub(crate) fn run_cmd_filtered(command: &String, filters: &Vec<String>) -> Result<(), Error> {
     if filters.is_empty() {
-        run_cmd(command)
-    } else {
-        let (shell, cmd_arg) = get_shell_cmd_arg();
-        logcln(command, Category::Arg);
-        let output = Command::new(shell).arg(cmd_arg).arg(command).output()?;
+        return run_cmd(command);
+    }
 
-        logcln("filter matches:", Category::Info);
-        for line in String::from_utf8(output.stdout).unwrap().lines() {
-            for filter in filters {
-                if line.contains(filter) {
-                    logln(line);
-                }
+    let (shell, cmd_arg) = get_shell_cmd_arg();
+    logcln(command, Category::Arg);
+    let output = Command::new(shell).arg(cmd_arg).arg(command).output()?;
+
+    logcln("matches:", Category::Info);
+    for line in String::from_utf8(output.stdout).unwrap().lines() {
+        for filter in filters {
+            if line.contains(filter) {
+                logln(line);
             }
         }
-        Ok(())
     }
+    Ok(())
 }
