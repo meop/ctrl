@@ -50,7 +50,7 @@ pub(crate) fn run_cmd_filtered(command: &String, filters: &Vec<String>) -> Resul
     logcln("matches:", Category::Info);
     for line in String::from_utf8(output.stdout).unwrap().lines() {
         for filter in filters {
-            if line.contains(filter) {
+            if line.to_lowercase().contains(&filter.to_lowercase()) {
                 logln(line);
             }
         }

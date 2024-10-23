@@ -154,7 +154,7 @@ fn get_managers() -> Vec<Box<dyn Manager>> {
             managers.push(Box::new(Pacman { program }));
         }
         // Android == Termux
-        Type::Android | Type::Debian | Type::Mint | Type::Raspbian | Type::Ubuntu => {
+        Type::Debian | Type::Ubuntu | Type::Mint | Type::Android => {
             let program = if exists_in_path("pkg") {
                 "pkg".to_string()
             } else if exists_in_path("apt") {
