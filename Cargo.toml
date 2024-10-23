@@ -1,6 +1,6 @@
 [package]
 name = "ctrl"
-version = "0.3.20"
+version = "0.3.21"
 edition = "2021"
 description = "CLI tool for cross platform OS management"
 categories = ["command-line-interface"]

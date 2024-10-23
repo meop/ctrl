@@ -6,6 +6,7 @@ use std::path::Path;
 use clap::Subcommand;
 use dialoguer::Confirm;
 use reqwest;
+use self_update::update::Release;
 use version_compare::Cmp;
 
 use crate::file::get_cur_path_str;
@@ -82,17 +83,25 @@ fn upgrade() -> Result<(), Box<dyn Error>> {
         .fetch()?;
 
     if releases.len() == 0 {
-        logcln("releases empty", Category::Info);
+        logcln("none found", Category::Info);
         return Ok(());
     }
 
-    let current_version = self_update::cargo_crate_version!();
-    let mut latest_version = releases[0].version.as_str();
+    let current_version = self_update::cargo_crate_version!().to_string();
+    let mut latest_version = current_version.clone();
 
     let binary = format!("{}-ctrl", self_update::get_target());
-    let asset = releases[0].asset_for(&binary, None);
-    if asset.is_none() {
-        latest_version = current_version;
+    let mut latest_viable_release: Option<Release> = None;
+
+    for r in releases {
+        if r.asset_for(&binary, None).is_some() {
+            latest_viable_release = Some(r);
+            break;
+        }
+    }
+
+    if let Some(ref r) = latest_viable_release {
+        latest_version = r.version.clone();
     }
 
     logcln(&format!("current: {current_version}"), Category::Info);
@@ -122,9 +131,15 @@ fn upgrade() -> Result<(), Box<dyn Error>> {
     // create will then truncate the existing file
     let tmp_path_file = File::create(&tmp_path_str)?;
 
-    self_update::Download::from_url(&asset.unwrap().download_url)
-        .set_header(reqwest::header::ACCEPT, "application/octet-stream".parse()?)
-        .download_to(&tmp_path_file)?;
+    self_update::Download::from_url(
+        latest_viable_release
+            .unwrap()
+            .asset_for(&binary, None)
+            .unwrap()
+            .download_url.as_str(),
+    )
+    .set_header(reqwest::header::ACCEPT, "application/octet-stream".parse()?)
+    .download_to(&tmp_path_file)?;
 
     self_update::Move::from_source(Path::new(&tmp_path_str))
         // windows requires this; unix is optional
