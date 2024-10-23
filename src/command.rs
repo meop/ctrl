@@ -2,10 +2,10 @@ use std::io::Error;
 use std::process::Command;
 
 use crate::file::exists_in_path;
+use crate::log::Category;
 use crate::log::logc;
 use crate::log::logcln;
 use crate::log::logln;
-use crate::log::Category;
 
 fn get_shell_cmd_arg() -> (String, String) {
     let mut shell = "sh";

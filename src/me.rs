@@ -9,8 +9,9 @@ use reqwest;
 use version_compare::Cmp;
 
 use crate::file::get_cur_path_str;
-use crate::log::logcln;
 use crate::log::Category;
+use crate::log::logcln;
+use crate::log::logln;
 
 #[derive(Subcommand)]
 pub(super) enum Command {
@@ -95,9 +96,8 @@ fn upgrade() -> Result<(), Box<dyn Error>> {
     logcln(&format!("latest: {latest_version}"), Category::Info);
 
     if version_compare::compare_to(current_version, latest_version, Cmp::Ge).unwrap() {
-        logcln(
+        logln(
             "already at latest",
-            Category::Info,
         );
         return Ok(());
     }
