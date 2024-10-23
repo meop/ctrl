@@ -6,7 +6,6 @@ use std::path::Path;
 use clap::Subcommand;
 use dialoguer::Confirm;
 use reqwest;
-use self_update::update::Release;
 use version_compare::Cmp;
 
 use crate::file::get_cur_path_str;
@@ -91,7 +90,7 @@ fn upgrade() -> Result<(), Box<dyn Error>> {
     let mut latest_version = current_version.clone();
 
     let binary = format!("{}-ctrl", self_update::get_target());
-    let mut latest_viable_release: Option<Release> = None;
+    let mut latest_viable_release = None;
 
     for r in releases {
         if r.asset_for(&binary, None).is_some() {
